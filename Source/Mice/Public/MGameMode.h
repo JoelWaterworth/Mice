@@ -3,16 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/PlayerController.h"
-#include "MPlayerController.generated.h"
+#include "GameFramework/GameModeBase.h"
+#include "MGameMode.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class MICE_API AMPlayerController : public APlayerController
+class MICE_API AMGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
+	
+	
 	
 	
 };

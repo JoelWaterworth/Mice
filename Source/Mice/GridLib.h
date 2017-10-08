@@ -13,10 +13,10 @@ struct FVector2DInt
 
 public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Vector2 Struct")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "position")
 		int32 x;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flower Struct")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "position")
 		int32 y;
 
 	//Constructor

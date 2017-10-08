@@ -61,9 +61,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Init")
 		int32 width;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Init")
-		int32 spacing;
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

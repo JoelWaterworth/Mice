@@ -17,8 +17,7 @@ AWorldGrid::AWorldGrid()
 	{
 		for (int y = 0; y < height; y++)
 		{
-			InstanceMesh->Add();
-			USceneComponent* baseScene = NewObject<USceneComponent>(this, USceneComponent::StaticClass());
+			
 		}
 	}
 
