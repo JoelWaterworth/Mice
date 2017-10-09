@@ -12,16 +12,16 @@ AWorldGrid::AWorldGrid()
 	root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	InstanceMesh = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("InstanceMesh"));
 	InstanceMesh->SetupAttachment(root);
-	/*
+
 	for (int x = 0; x < width; x++)
 	{
 		for (int y = 0; y < height; y++)
 		{
-	//		InstanceMesh->Add();
-	//		USceneComponent* baseScene = NewObject<USceneComponent>(this, USceneComponent::StaticClass());
+			InstanceMesh->Add();
+			USceneComponent* baseScene = NewObject<USceneComponent>(this, USceneComponent::StaticClass());
 		}
 	}
-	*/
+
 }
 
 // Called when the game starts or when spawned
