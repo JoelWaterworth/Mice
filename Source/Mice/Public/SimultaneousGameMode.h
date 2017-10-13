@@ -3,19 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "MPlayerState.h"
+#include "MPlayerController.h"
+#include "MCommand.h"
 #include "GameFramework/GameMode.h"
 #include "SimultaneousGameMode.generated.h"
 
 /**
  * 
  */
-
-UENUM(BlueprintType)
-enum class ETeam : uint8
-{
-	T_Blue 	UMETA(DisplayName = "Blue"),
-	T_Red 	UMETA(DisplayName = "Red")
-};
 
 UCLASS()
 class MICE_API ASimultaneousGameMode : public AGameMode
@@ -25,7 +21,26 @@ class MICE_API ASimultaneousGameMode : public AGameMode
 	
 public:
 	ASimultaneousGameMode();
+
+	/** setup team changes at player login */
+	void PostLogin(APlayerController* NewPlayer) override;
+
+	UFUNCTION(BlueprintCallable)
+		void sumbitCommands(AMPlayerController* playerController);
 	
 protected:
 	virtual void BeginPlay() override;
+
+	ETeam ChooseTeam(APlayerState* playerState);
+
+	/** select best spawn point for player */
+	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
+
+	void ExecuteCommands();
+	
+	TArray<UMCommand*> blueCommands;
+	TArray<UMCommand*> redCommands;
+
+	bool isBlueReady;
+	bool isRedReady;
 };

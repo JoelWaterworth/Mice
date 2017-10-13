@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Unit.h"
-#include "SimultaneousGameMode.h"
+#include "MCommand.h"
 #include "GameFramework/PlayerController.h"
 #include "MPlayerController.generated.h"
 
@@ -20,8 +20,6 @@ public:
 	AMPlayerController();
 	
 	int32 Limit;
-
-	ETeam Team;
 
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<class AActor> CursorClass;
@@ -44,7 +42,11 @@ protected:
 
 	virtual void BeginPlay() override;
 
+	TArray<UMCommand*> commands;
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	TArray<UMCommand*> GetCommands();
 };

@@ -29,7 +29,10 @@ void AMPlayerController::Target()
 			UGridCollision* col = Cast<UGridCollision>(Res.GetComponent());
 			if (col)
 			{
-				Selected->MoveTo(RootsToPath(col->pos, roots));
+				UMCommand* command = NewObject<UMCommand>(this, UMCommand::StaticClass());
+				command->path = RootsToPath(col->pos, roots);
+				command->unit = Selected;
+				commands.Add(command);
 			}
 		}
 	}
@@ -78,7 +81,6 @@ TArray<FVector2DInt> AMPlayerController::RootsToPath(FVector2DInt dest, TMap<FVe
 
 void AMPlayerController::BeginPlay()
 {
-	Super::BeginPlay();
 	bShowMouseCursor = true;
 
 	UWorld* const World = GetWorld();
@@ -91,6 +93,7 @@ void AMPlayerController::BeginPlay()
 		FTransform trans = worldGrid->VectorToWorldTransform(FVector2DInt(0,0));
 		Cursor = World->SpawnActor<AActor>(CursorClass, trans);
 	};
+	Super::BeginPlay();
 }
 
 void AMPlayerController::Tick(float DeltaTime)
@@ -109,4 +112,9 @@ void AMPlayerController::Tick(float DeltaTime)
 			}
 		}
 	}
+}
+
+TArray<UMCommand*> AMPlayerController::GetCommands()
+{
+	return commands;
 }
