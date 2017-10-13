@@ -27,7 +27,16 @@ void AWorldGrid::BeginPlay()
 {
 	Super::BeginPlay();
 
-
+	UWorld* const World = GetWorld();
+	if (World)
+	{
+		FTransform trans = VectorToWorldTransform(spawnPoints);
+		AUnit* unit = World->SpawnActor<AUnit>(spawnClass, trans);
+		if (unit)
+		{
+			unit->pos = spawnPoints;
+		}
+	};
 }
 
 // Called every frame

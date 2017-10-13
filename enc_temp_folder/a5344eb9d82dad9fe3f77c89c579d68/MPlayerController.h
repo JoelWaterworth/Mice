@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Unit.h"
-#include "SimultaneousGameMode.h"
 #include "GameFramework/PlayerController.h"
 #include "MPlayerController.generated.h"
 
@@ -20,8 +19,6 @@ public:
 	AMPlayerController();
 	
 	int32 Limit;
-
-	ETeam Team;
 
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<class AActor> CursorClass;
