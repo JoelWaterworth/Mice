@@ -3,11 +3,31 @@
 #include "MPlayerController.h"
 #include "Public/WorldGrid.h"
 #include "Kismet/GameplayStatics.h"
+#include "MGameState.h"
+#include "UnrealNetwork.h"
 #include "../Public/MPlayerController.h"
 
 AMPlayerController::AMPlayerController()
 {
 
+}
+
+void AMPlayerController::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AMPlayerController, commands);
+}
+
+bool AMPlayerController::ServerSubmitCommands_Validate()
+{
+	return true;
+}
+
+void AMPlayerController::ServerSubmitCommands_Implementation()
+{
+	AMGameState* gameState = Cast<AMGameState>(GetWorld()->GetGameState());
+	gameState->SumbitCommands(this);
 }
 
 void AMPlayerController::SetupInputComponent()
@@ -29,10 +49,9 @@ void AMPlayerController::Target()
 			UGridCollision* col = Cast<UGridCollision>(Res.GetComponent());
 			if (col)
 			{
-				UMCommand* command = NewObject<UMCommand>(this, UMCommand::StaticClass());
-				command->path = RootsToPath(col->pos, roots);
-				command->unit = Selected;
-				commands.Add(command);
+				AddCommand(Selected, RootsToPath(col->pos, roots));
+				if (GEngine)
+					GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Add command"));
 			}
 		}
 	}
@@ -52,7 +71,8 @@ void AMPlayerController::Select()
 			TArray<AActor*> worldGrids;
 			UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWorldGrid::StaticClass(), worldGrids);
 			AWorldGrid* worldGrid = Cast<AWorldGrid>(worldGrids[0]);
-			if (worldGrid) {
+			if (worldGrid)
+			{
 				roots = worldGrid->CalculatePaths(Selected, 8);
 			}
 		}
@@ -70,7 +90,8 @@ TArray<FVector2DInt> AMPlayerController::RootsToPath(FVector2DInt dest, TMap<FVe
 		if (current) {
 			path.Add(*current);
 		}
-		else {
+		else
+		{
 			break;
 		}
 	}
@@ -96,19 +117,41 @@ void AMPlayerController::BeginPlay()
 	Super::BeginPlay();
 }
 
+bool AMPlayerController::AddCommand_Validate(AUnit* unit, const TArray<FVector2DInt> &lpath)
+{
+	return true;
+}
+
+void AMPlayerController::AddCommand_Implementation(AUnit* unit, const TArray<FVector2DInt> &path)
+{
+	if(!unit)
+	{
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("invalid unit"));
+	}
+
+	UMCommand* command = NewObject<UMCommand>(this, UMCommand::StaticClass());
+	command->path = path;
+	command->unitID = unit->GetUniqueID();
+	commands.Add(command);
+}
+
 void AMPlayerController::Tick(float DeltaTime)
 {
-	FHitResult Res;
-	bool Hit = GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_GameTraceChannel1), true, Res);
-	if (Hit)
+	if (Cursor)
 	{
-		UGridCollision* col = Cast<UGridCollision>(Res.GetComponent());
-		if (col)
+		FHitResult Res;
+		bool Hit = GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_GameTraceChannel1), true, Res);
+		if (Hit)
 		{
-			AWorldGrid* grid = Cast<AWorldGrid>(Res.GetActor());
-			if (grid)
+			UGridCollision* col = Cast<UGridCollision>(Res.GetComponent());
+			if (col)
 			{
-				Cursor->SetActorLocation( grid->VectorToWorldTransform(col->pos).GetLocation() + FVector(0.0f, 0.0f, 10.0f));
+				AWorldGrid* grid = Cast<AWorldGrid>(Res.GetActor());
+				if (grid)
+				{
+					Cursor->SetActorLocation(grid->VectorToWorldTransform(col->pos).GetLocation() + FVector(0.0f, 0.0f, 10.0f));
+				}
 			}
 		}
 	}

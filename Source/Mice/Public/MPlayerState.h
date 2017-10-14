@@ -24,6 +24,6 @@ class MICE_API AMPlayerState : public APlayerState
 	
 public:
 	AMPlayerState();
-
-	ETeam team;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Team")
+		ETeam team;
 };

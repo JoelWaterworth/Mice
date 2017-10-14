@@ -23,6 +23,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<class AActor> CursorClass;
+
+	UFUNCTION(reliable, server, WithValidation)
+		void ServerSubmitCommands();
 protected:
 
 	AUnit* Selected;
@@ -42,7 +45,11 @@ protected:
 
 	virtual void BeginPlay() override;
 
+	UPROPERTY(Replicated)
 	TArray<UMCommand*> commands;
+
+	UFUNCTION(reliable, server, WithValidation)
+		void AddCommand(AUnit* unit, const TArray<FVector2DInt> &path);
 
 public:
 	// Called every frame

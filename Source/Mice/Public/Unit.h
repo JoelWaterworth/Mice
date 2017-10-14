@@ -27,6 +27,7 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 		UStaticMeshComponent* selectPlane;
 
+	UFUNCTION(BlueprintCallable)
 	void MoveTo(TArray<FVector2DInt> path);
 
 protected:

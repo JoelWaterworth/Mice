@@ -15,6 +15,8 @@ AUnit::AUnit()
 	selectPlane = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Plane"));
 	selectPlane->SetupAttachment(root);
 	selectPlane->SetVisibility(false);
+
+	//bReplicates = true;
 }
 
 void AUnit::MoveTo(TArray<FVector2DInt> path)

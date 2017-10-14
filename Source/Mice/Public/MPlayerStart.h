@@ -16,6 +16,6 @@ class MICE_API AMPlayerStart : public APlayerStart
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Team")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Team")
 		ETeam team;
 };

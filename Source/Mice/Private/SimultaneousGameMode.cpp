@@ -8,6 +8,7 @@
 #include "MPlayerState.h"
 #include "Classes/Engine/World.h"
 #include "Unit.h"
+#include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -38,12 +39,16 @@ void ASimultaneousGameMode::sumbitCommands(AMPlayerController * playerController
 	{
 		blueCommands = playerController->GetCommands();
 		isBlueReady = true;
-	} 
+	}
+
 	if (playerState->team == ETeam::T_Red)
 	{
 		redCommands = playerController->GetCommands();
 		isRedReady = true;
 	}
+
+	ExecuteCommands();
+
 	if (isBlueReady && isRedReady)
 	{
 		ExecuteCommands();
@@ -52,6 +57,8 @@ void ASimultaneousGameMode::sumbitCommands(AMPlayerController * playerController
 
 void ASimultaneousGameMode::BeginPlay()
 {
+	Super::BeginPlay();
+
 	UWorld* const World = GetWorld();
 	if (World)
 	{
@@ -82,7 +89,14 @@ void ASimultaneousGameMode::BeginPlay()
 				}
 			}
 		}
-
+		/*
+		for (TActorIterator<AUnit> ActorItr(World); ActorItr; ++ActorItr)
+		{
+			TArray<FVector2DInt> path = TArray<FVector2DInt>();
+			path.Add(FVector2DInt(2, 2));
+			ActorItr->MoveTo(path);
+		}
+		*/
 	};
 }
 
@@ -106,15 +120,11 @@ AActor * ASimultaneousGameMode::ChoosePlayerStart_Implementation(AController * P
 	UWorld* const World = GetWorld();
 	if (World)
 	{
-		TArray<AActor*> actors;
-		UGameplayStatics::GetAllActorsOfClass(World, AMPlayerStart::StaticClass(), actors);
-		for (AActor* actor : actors)
+		for (TActorIterator<AMPlayerStart> playerStart(World); playerStart; ++playerStart)
 		{
-			AMPlayerStart* playerStart = Cast<AMPlayerStart>(actor);
-			
 			if (playerTeam == playerStart->team)
 			{
-				return playerStart;
+				return *playerStart;
 			}
 		}
 	}
