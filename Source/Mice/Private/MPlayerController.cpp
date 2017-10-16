@@ -7,10 +7,6 @@
 #include "UnrealNetwork.h"
 #include "../Public/MPlayerController.h"
 
-AMPlayerController::AMPlayerController()
-{
-
-}
 
 void AMPlayerController::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
 {
@@ -49,7 +45,7 @@ void AMPlayerController::Target()
 			UGridCollision* col = Cast<UGridCollision>(Res.GetComponent());
 			if (col)
 			{
-				AddCommand(Selected, RootsToPath(col->pos, roots));
+				Selected->WalkCommand(col->pos, this);
 				if (GEngine)
 					GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Add command"));
 			}
@@ -73,31 +69,10 @@ void AMPlayerController::Select()
 			AWorldGrid* worldGrid = Cast<AWorldGrid>(worldGrids[0]);
 			if (worldGrid)
 			{
-				roots = worldGrid->CalculatePaths(Selected, 8);
+				unit->Paths = worldGrid->CalculatePaths(Selected, 8);
 			}
 		}
 	}
-}
-
-TArray<FVector2DInt> AMPlayerController::RootsToPath(FVector2DInt dest, TMap<FVector2DInt, FVector2DInt> roots)
-{
-	FVector2DInt* current = &dest;
-	TArray<FVector2DInt> path = TArray<FVector2DInt>();
-	path.Add(*current);
-	while (roots.Contains(*current))
-	{
-		current = roots.Find(*current);
-		if (current) {
-			path.Add(*current);
-		}
-		else
-		{
-			break;
-		}
-	}
-	path.Pop();
-	Algo::Reverse(path);
-	return path;
 }
 
 void AMPlayerController::BeginPlay()
@@ -124,16 +99,7 @@ bool AMPlayerController::AddCommand_Validate(AUnit* unit, const TArray<FVector2D
 
 void AMPlayerController::AddCommand_Implementation(AUnit* unit, const TArray<FVector2DInt> &path)
 {
-	if(!unit)
-	{
-		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("invalid unit"));
-	}
 
-	UMCommand* command = NewObject<UMCommand>(this, UMCommand::StaticClass());
-	command->path = path;
-	command->unitID = unit->GetUniqueID();
-	commands.Add(command);
 }
 
 void AMPlayerController::Tick(float DeltaTime)

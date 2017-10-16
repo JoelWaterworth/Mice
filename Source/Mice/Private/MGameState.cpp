@@ -65,33 +65,13 @@ void AMGameState::ExecuteCommands()
 	{
 		if (GEngine)
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Execute blue"));
-		UWorld* const World = GetWorld();
-		if (World)
-		{
-			for (TActorIterator<AUnit> unit(World); unit; ++unit)
-			{
-				if (unit->GetUniqueID() == command->unitID)
-				{
-					unit->MoveTo(command->path);
-				}
-			}
-		}
+		command->Run();
 	}
 	for (UMCommand* command : redCommands)
 	{
 		if (GEngine)
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Execute blue"));
-		UWorld* const World = GetWorld();
-		if (World)
-		{
-			for (TActorIterator<AUnit> unit(World); unit; ++unit)
-			{
-				if (unit->GetUniqueID() == command->unitID)
-				{
-					unit->MoveTo(command->path);
-				}
-			}
-		}
+		command->Run();
 	}
 	blueCommands.Empty();
 	redCommands.Empty();

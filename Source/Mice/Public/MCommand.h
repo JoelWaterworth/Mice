@@ -19,7 +19,7 @@ class MICE_API UMCommand : public UObject
 public:
 	
 	UPROPERTY(Replicated)
-	int32 unitID;
+	AUnit* unit;
 
 	TArray<FVector2DInt> path;
 

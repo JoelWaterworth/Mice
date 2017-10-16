@@ -3,6 +3,8 @@
 #include "Unit.h"
 #include "Classes/Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "MPlayerController.h"
+#include "MCommand.h"
 #include "Public/WorldGrid.h"
 #include "../Public/Unit.h"
 
@@ -42,6 +44,40 @@ void AUnit::SetNewLocation()
 	AWorldGrid* worldGrid = Cast<AWorldGrid>(worldGrids[0]);
 
 	NextLocation = worldGrid->VectorToWorldTransform(Path[Pathpos]).GetLocation();
+}
+
+bool AUnit::WalkCommand_Validate(FVector2DInt dest, AMPlayerController* playerController)
+{
+	return true;
+}
+
+void AUnit::WalkCommand_Implementation(FVector2DInt dest, AMPlayerController* playerController) {
+	UMCommand* command = NewObject<UMCommand>(this, UMCommand::StaticClass());
+	command->path = RootsToPath(dest);
+	command->unit = this;
+	
+	playerController->commands.Add(command);
+}
+
+TArray<FVector2DInt> AUnit::RootsToPath(FVector2DInt dest)
+{
+	FVector2DInt* current = &dest;
+	TArray<FVector2DInt> path = TArray<FVector2DInt>();
+	path.Add(*current);
+	while (roots.Contains(*current))
+	{
+		current = Paths.Find(*current);
+		if (current) {
+			path.Add(*current);
+		}
+		else
+		{
+			break;
+		}
+	}
+	path.Pop();
+	Algo::Reverse(path);
+	return path;
 }
 
 // Called every frame

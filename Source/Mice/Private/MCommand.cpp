@@ -9,7 +9,7 @@ void UMCommand::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLife
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UMCommand, unitID);
+	DOREPLIFETIME(UMCommand, unit);
 }
 
 void UMCommand::Run()
@@ -17,15 +17,5 @@ void UMCommand::Run()
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Run"));
 
-	UWorld* const World = GetWorld();
-	if (World)
-	{
-		for (TActorIterator<AUnit> unit(World); unit; ++unit)
-		{
-			if (unit->GetUniqueID() == unitID)
-			{
-				unit->MoveTo(path);
-			}
-		}
-	}
+	unit->MoveTo(path);
 }

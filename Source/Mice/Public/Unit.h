@@ -7,6 +7,8 @@
 #include "GameFramework/Actor.h"
 #include "Unit.generated.h"
 
+class AMPlayerController;
+
 UENUM(BlueprintType)
 enum class EUnitState : uint8
 {
@@ -30,6 +32,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void MoveTo(TArray<FVector2DInt> path);
 
+	TMap<FVector2DInt, FVector2DInt> Paths;
+
+	UFUNCTION(reliable, server, WithValidation)
+		void WalkCommand(FVector2DInt dest, AMPlayerController* playerController);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -42,9 +49,13 @@ protected:
 
 	TArray<FVector2DInt> Path;
 
+	TMap<FVector2DInt, FVector2DInt> roots;
+
 	FVector NextLocation;
 
 	void SetNewLocation();
+
+	TArray<FVector2DInt> RootsToPath(FVector2DInt dest);
 
 public:	
 	// Called every frame

@@ -17,8 +17,6 @@ class MICE_API AMPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
-	AMPlayerController();
-	
 	int32 Limit;
 
 	UPROPERTY(EditAnywhere)
@@ -26,14 +24,14 @@ public:
 
 	UFUNCTION(reliable, server, WithValidation)
 		void ServerSubmitCommands();
+
+	UPROPERTY(Replicated)
+		TArray<UMCommand*> commands;
 protected:
 
 	AUnit* Selected;
 
 	AActor* Cursor;
-
-	TMap<FVector2DInt, FVector2DInt> roots;
-
 
 	virtual void SetupInputComponent() override;
 
@@ -41,12 +39,7 @@ protected:
 
 	void Select();
 
-	TArray<FVector2DInt> RootsToPath(FVector2DInt dest, TMap<FVector2DInt, FVector2DInt> roots);
-
 	virtual void BeginPlay() override;
-
-	UPROPERTY(Replicated)
-	TArray<UMCommand*> commands;
 
 	UFUNCTION(reliable, server, WithValidation)
 		void AddCommand(AUnit* unit, const TArray<FVector2DInt> &path);
