@@ -11,17 +11,12 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType, Blueprintable)
 class MICE_API UMCommand : public UObject
 {
 	GENERATED_BODY()
 	
 public:
-	
-	UPROPERTY(Replicated)
-	AUnit* unit;
-
-	TArray<FVector2DInt> path;
-
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void Run();
 };

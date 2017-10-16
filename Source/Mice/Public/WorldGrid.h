@@ -96,15 +96,15 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 		FTransform VectorToWorldTransform(FVector2DInt pos);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 		FTransform VectorToLocalTransform(FVector2DInt pos);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 		TMap<FVector2DInt, FVector2DInt> CalculatePaths(AUnit* Unit, int32 Limit);
 
-	UFUNCTION()
-		TArray<FVector2DInt> CreatePathFromRoutes(TMap<FVector2DInt, FVector2DInt> cameFrom, FVector2DInt Dest);
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+		static TArray<FVector2DInt> CreatePathFromRoutes(TMap<FVector2DInt, FVector2DInt> cameFrom, FVector2DInt Dest);
 };

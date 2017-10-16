@@ -17,15 +17,16 @@ class MICE_API AMPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
+	AMPlayerController();
 	int32 Limit;
 
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<class AActor> CursorClass;
 
-	UFUNCTION(reliable, server, WithValidation)
+	UFUNCTION(reliable, server, WithValidation, BlueprintCallable)
 		void ServerSubmitCommands();
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, BlueprintReadWrite)
 		TArray<UMCommand*> commands;
 protected:
 
@@ -35,18 +36,14 @@ protected:
 
 	virtual void SetupInputComponent() override;
 
-	void Target();
+	//void Target();
 
-	void Select();
+	//void Select();
 
 	virtual void BeginPlay() override;
 
-	UFUNCTION(reliable, server, WithValidation)
-		void AddCommand(AUnit* unit, const TArray<FVector2DInt> &path);
-
 public:
 	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 	TArray<UMCommand*> GetCommands();
 };

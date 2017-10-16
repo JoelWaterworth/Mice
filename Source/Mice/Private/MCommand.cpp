@@ -5,17 +5,5 @@
 #include "EngineUtils.h"
 #include "UnrealNetwork.h"
 
-void UMCommand::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(UMCommand, unit);
-}
-
-void UMCommand::Run()
-{
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Run"));
-
-	unit->MoveTo(path);
-}
+void UMCommand::Run_Implementation()
+{}

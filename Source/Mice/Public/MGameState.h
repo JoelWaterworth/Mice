@@ -24,6 +24,7 @@ public:
 	
 protected:
 
+
 	void ExecuteCommands();
 
 	UPROPERTY(Replicated)

@@ -119,6 +119,7 @@ TArray<FVector2DInt> AWorldGrid::CreatePathFromRoutes(TMap<FVector2DInt, FVector
 			break;
 		}
 	}
+	path.Pop();
 	Algo::Reverse(path);
 	return path;
 }

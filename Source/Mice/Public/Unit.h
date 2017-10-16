@@ -26,16 +26,11 @@ public:
 	AUnit();
 
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
-	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+	UPROPERTY(BlueprintReadWrite, Category = Mesh)
 		UStaticMeshComponent* selectPlane;
 
-	UFUNCTION(BlueprintCallable)
-	void MoveTo(TArray<FVector2DInt> path);
-
-	TMap<FVector2DInt, FVector2DInt> Paths;
-
-	UFUNCTION(reliable, server, WithValidation)
-		void WalkCommand(FVector2DInt dest, AMPlayerController* playerController);
+	UPROPERTY(BlueprintReadWrite)
+	TMap<FVector2DInt, FVector2DInt> roots;
 
 protected:
 	// Called when the game starts or when spawned
@@ -43,25 +38,8 @@ protected:
 
 	USceneComponent* root;
 
-	int32 Pathpos;
+public:
 
-	EUnitState State;
-
-	TArray<FVector2DInt> Path;
-
-	TMap<FVector2DInt, FVector2DInt> roots;
-
-	FVector NextLocation;
-
-	void SetNewLocation();
-
-	TArray<FVector2DInt> RootsToPath(FVector2DInt dest);
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 		FVector2DInt pos;
-	
 };

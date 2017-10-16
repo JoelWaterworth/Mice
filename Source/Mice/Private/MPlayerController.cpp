@@ -7,6 +7,10 @@
 #include "UnrealNetwork.h"
 #include "../Public/MPlayerController.h"
 
+AMPlayerController::AMPlayerController()
+{
+	PrimaryActorTick.bCanEverTick = true;
+}
 
 void AMPlayerController::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
 {
@@ -30,10 +34,10 @@ void AMPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
-	InputComponent->BindAction("Target", IE_Pressed, this, &AMPlayerController::Target);
-	InputComponent->BindAction("Select", IE_Pressed, this, &AMPlayerController::Select);
+	//InputComponent->BindAction("Target", IE_Pressed, this, &AMPlayerController::Target);
+	//InputComponent->BindAction("Select", IE_Pressed, this, &AMPlayerController::Select);
 }
-
+/*
 void AMPlayerController::Target()
 {
 	FHitResult Res;
@@ -74,53 +78,11 @@ void AMPlayerController::Select()
 		}
 	}
 }
-
+*/
 void AMPlayerController::BeginPlay()
 {
 	bShowMouseCursor = true;
-
-	UWorld* const World = GetWorld();
-	if (World)
-	{
-		TArray<AActor*> worldGrids;
-		UGameplayStatics::GetAllActorsOfClass(World, AWorldGrid::StaticClass(), worldGrids);
-		AWorldGrid* worldGrid = Cast<AWorldGrid>(worldGrids[0]);
-
-		FTransform trans = worldGrid->VectorToWorldTransform(FVector2DInt(0,0));
-		Cursor = World->SpawnActor<AActor>(CursorClass, trans);
-	};
 	Super::BeginPlay();
-}
-
-bool AMPlayerController::AddCommand_Validate(AUnit* unit, const TArray<FVector2DInt> &lpath)
-{
-	return true;
-}
-
-void AMPlayerController::AddCommand_Implementation(AUnit* unit, const TArray<FVector2DInt> &path)
-{
-
-}
-
-void AMPlayerController::Tick(float DeltaTime)
-{
-	if (Cursor)
-	{
-		FHitResult Res;
-		bool Hit = GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_GameTraceChannel1), true, Res);
-		if (Hit)
-		{
-			UGridCollision* col = Cast<UGridCollision>(Res.GetComponent());
-			if (col)
-			{
-				AWorldGrid* grid = Cast<AWorldGrid>(Res.GetActor());
-				if (grid)
-				{
-					Cursor->SetActorLocation(grid->VectorToWorldTransform(col->pos).GetLocation() + FVector(0.0f, 0.0f, 10.0f));
-				}
-			}
-		}
-	}
 }
 
 TArray<UMCommand*> AMPlayerController::GetCommands()
