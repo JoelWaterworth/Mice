@@ -8,3 +8,8 @@ AMPlayerState::AMPlayerState()
 {
 
 }
+
+void AMPlayerState::UpdatePlayerTeam(ETeam team)
+{
+	
+}

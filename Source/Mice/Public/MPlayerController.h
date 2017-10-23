@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Unit.h"
 #include "MCommand.h"
+#include "MPlayerState.h"
 #include "GameFramework/PlayerController.h"
 #include "MPlayerController.generated.h"
 
@@ -28,13 +29,14 @@ public:
 
 	UPROPERTY(Replicated, BlueprintReadWrite)
 		TArray<UMCommand*> commands;
+
+	UFUNCTION(BlueprintNativeEvent)
+		void UpdatePlayerTeam(ETeam team);
 protected:
 
 	AUnit* Selected;
 
 	AActor* Cursor;
-
-	virtual void SetupInputComponent() override;
 
 	//void Target();
 

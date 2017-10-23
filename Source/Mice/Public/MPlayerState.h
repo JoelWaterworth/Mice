@@ -26,4 +26,7 @@ public:
 	AMPlayerState();
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Team")
 		ETeam team;
+
+	//Do not store the team arg in the player pawn
+	void UpdatePlayerTeam(ETeam team);
 };
