@@ -16,7 +16,6 @@ struct FGridTile
 {
 	GENERATED_BODY()
 
-public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool isWalkable;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -25,6 +24,8 @@ public:
 		UTextRenderComponent* DebugTextRender;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		AUnit* Unit;
+
+public:
 
 	FGridTile(
 		bool w = false,
@@ -37,7 +38,7 @@ public:
 			Unit(u) {}
 };
 
-UCLASS(ClassGroup = Collision, meta = (BlueprintSpawnableComponent))
+UCLASS(BlueprintType, Blueprintable)
 class MICE_API AWorldGrid : public AActor
 {
 	GENERATED_BODY()
@@ -46,14 +47,14 @@ public:
 	// Sets default values for this actor's properties
 	AWorldGrid();
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		UInstancedStaticMeshComponent* InstanceMesh;
+
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<class AUnit> spawnClass;
 
 	UPROPERTY()
 		USceneComponent* root;
-
-	UPROPERTY()
-		TMap<FVector2DInt, FGridTile> GridTiles;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Init")
 		int32 height;
@@ -64,14 +65,46 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Init")
 		int32 spacing;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Init")
+		FVector CollisionExtent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Foo")
+	TMap<FVector2DInt, FGridTile> gridTiles;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garbage")
+	TArray<USceneComponent*> waste;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Points")
+		TArray<FVector2DInt> BlueSpawnPoints;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Points")
+		TArray<FVector2DInt> RedSpawnPoints;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void OnConstruction(const FTransform& Transform) override;
+
+	void DebugPath(TMap<FVector2DInt, int32> gScore);
+
+	TArray<FVector2DInt> GetNeighbours(FVector2DInt origin);
+
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	
-	
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+		FTransform VectorToWorldTransform(FVector2DInt pos);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+		FTransform VectorToLocalTransform(FVector2DInt pos);
+
+	UFUNCTION(BlueprintCallable)
+		TMap<FVector2DInt, FVector2DInt> CalculatePaths(AUnit* Unit, int32 Limit);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+		static TArray<FVector2DInt> CreatePathFromRoutes(TMap<FVector2DInt, FVector2DInt> cameFrom, FVector2DInt Dest);
 };

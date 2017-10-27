@@ -20,7 +20,7 @@ public:
 		int32 y;
 
 	//Constructor
-	FVector2DInt(int32 n = 0, int32 d = 0) : x(n), y(d) {}
+	FVector2DInt(int32 n_x = 0, int32 n_y = 0) : x(n_x), y(n_y) {}
 
 	FORCEINLINE FVector2DInt operator+(const FVector2DInt& V) const {
 		return FVector2DInt(x + V.x, y + V.y);
@@ -28,6 +28,10 @@ public:
 
 	FORCEINLINE bool operator==(const FVector2DInt& V) const {
 		return x == V.x && y == V.y;
+	}
+
+	FORCEINLINE FVector2DInt operator*(const int32& V) const {
+		return FVector2DInt(x * V, y * V);
 	}
 };
 

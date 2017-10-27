@@ -20,5 +20,5 @@ FVector2DInt UGridLib::Mul_FVector2DIntInt(const FVector2DInt & arg1, const int3
 
 bool UGridLib::EqualEqual_FVector2DIntFVector2DInt(const FVector2DInt & arg1, const FVector2DInt & arg2)
 {
-	return arg1 == arg2;
+	return (arg1 == arg2);
 }
