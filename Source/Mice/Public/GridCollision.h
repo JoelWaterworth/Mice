@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GridLib.h"
 #include "Components/BoxComponent.h"
 #include "GridCollision.generated.h"
 
@@ -17,5 +16,5 @@ class MICE_API UGridCollision : public UBoxComponent
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Vector2 Struct")
-		FVector2DInt pos;
+		FIntVector pos;
 };

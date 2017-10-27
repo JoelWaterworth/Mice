@@ -38,6 +38,7 @@ void APlayerCamera::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 	PlayerInputComponent->BindAxis("Forward", this, &APlayerCamera::MoveForward);
 	PlayerInputComponent->BindAxis("Rightward", this, &APlayerCamera::MoveRightward);
+
 }
 
 void APlayerCamera::MoveForward(float Val)
