@@ -26,7 +26,7 @@ public:
 	AUnit();
 
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
-	UPROPERTY(BlueprintReadWrite, Category = Mesh)
+	UPROPERTY(EditDefaultsOnly, Category = Mesh)
 		UStaticMeshComponent* selectPlane;
 
 	UPROPERTY(BlueprintReadWrite)
