@@ -25,9 +25,10 @@ void AGridObject::PostEditMove(bool bFinished)
 		if (worldGrid)
 		{
 			FIntVector offset = worldGrid->LocationToVector(loc);
+			FRotator rotOffset = worldGrid->GetActorRotation();
 
-			RootComponent->SetWorldTransform(worldGrid->VectorToWorldTransform(offset));
-			GridOrigin = FGridTransform(offset);
+			RootComponent->SetWorldLocation(worldGrid->VectorToWorldTransform(offset).GetLocation());
+			GridOrigin.Origin = offset;
 		}
 	}
 	
@@ -37,18 +38,15 @@ void AGridObject::PostEditMove(bool bFinished)
 FGridObjectTree AGridObject::GetObjectTree()
 {
 	FGridObjectTree tree;
-	
 	TArray<UChildActorComponent*> Comps;
-
 	GetComponents(Comps);
-
 	tree.Trans = GridOrigin;
 
-	for (UChildActorComponent* child : Comps) {
+	for (UChildActorComponent* child : Comps)
+	{
 		AGridObject* object = Cast<AGridObject>(child->GetChildActor());
 		if (object)
 		{
-			
 			tree.Children.Add(object->GetObjectTree());
 		}
 	};

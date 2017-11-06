@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GridCollision.h"
 #include "Unit.h"
+#include "GridObject.h"
 #include "Runtime/Engine/Classes/Components/TextRenderComponent.h"
 #include "Runtime/Engine/Classes/Components/InstancedStaticMeshComponent.h"
 #include "GameFramework/Actor.h"
@@ -89,6 +90,7 @@ protected:
 
 	TArray<FIntVector> GetNeighbours(FIntVector origin);
 
+	TArray<AGridObject*> GridObjects;
 
 public:	
 	// Called every frame

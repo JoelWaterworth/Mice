@@ -2,13 +2,14 @@
 
 #include "WorldGrid.h"
 #include "Algo/Reverse.h"
+#include "EngineUtils.h"
 #include "../Public/WorldGrid.h"
 
 
 // Sets default values
 AWorldGrid::AWorldGrid()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
@@ -27,14 +28,59 @@ void AWorldGrid::BeginPlay()
 {
 	Super::BeginPlay();
 
+	TArray<FGridTransform> trans;
 
+	for (TActorIterator<AGridObject> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		// Access the subclass instance with the * or -> operators.
+		AGridObject* object = *ActorItr;
+
+		trans.Add(object->GridOrigin);
+	}
+
+	for (FGridTransform& tran : trans)
+	{
+		for (FIntVector& pos : tran.Posistions)
+		{
+			FIntVector loc = pos + tran.Origin;
+			int32 x = loc.X, y = loc.Y, z = loc.Z;
+			FVector vec = FVector((float)(x * spacing), (float)(y * spacing), (float)(z * spacing));
+
+			InstanceMesh->AddInstance(FTransform(vec));
+
+			UTextRenderComponent* text = NewObject<UTextRenderComponent>(this, UTextRenderComponent::StaticClass());
+			if (text) {
+				text->RegisterComponent();
+				waste.Add(text);
+				//Attach the component to the root component
+				text->AttachToComponent(root, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+
+				FTransform textTrans = FTransform(FRotator(90.0f, 0.0f, 0.0f), vec, FVector(1.0f));
+				text->SetRelativeTransform(textTrans);
+			}
+
+			UGridCollision* col = NewObject<UGridCollision>(this, UGridCollision::StaticClass());
+			if (col) {
+				col->RegisterComponent();
+				waste.Add(col);
+
+				col->SetBoxExtent(CollisionExtent, true);
+				col->pos = FIntVector(x, y, 0);
+				col->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
+				col->AttachToComponent(root, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+
+				FTransform colTrans = FTransform(FRotator(0.0f), vec);
+				col->SetRelativeTransform(colTrans);
+			}
+			gridTiles.Add(FIntVector(x, y, z), FGridTile(tran.isWalkable, col, text));
+		}
+	}
 }
 
 // Called every frame
 void AWorldGrid::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 FTransform AWorldGrid::VectorToWorldTransform(FIntVector pos)
@@ -137,6 +183,7 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 	//Empty the array and delete all it's components
+	
 	for (USceneComponent* elem : waste)
 	{
 		if (elem)
@@ -144,7 +191,7 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 			elem->DestroyComponent();
 		}
 	}
-	
+	/*
 	waste.Empty();
 	gridTiles.Empty();
 	InstanceMesh->ClearInstances();
@@ -182,6 +229,7 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 			gridTiles.Add(FIntVector(x,y, 0), FGridTile(true,col,text));
 		}
 	}
+	*/
 
 	//Register all the components
 	RegisterAllComponents();

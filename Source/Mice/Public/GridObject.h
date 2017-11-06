@@ -20,18 +20,30 @@ struct FGridTransform
 {
 	GENERATED_BODY()
 
-		UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FIntVector Posistion;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FIntVector Origin;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		EDirection Direction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TArray<FIntVector> Posistions;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool isBorder;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool isWalkable;
 
 public:
 
 	FGridTransform(
-		FIntVector posistion = FIntVector(0),
-		EDirection direction = EDirection::D_Forward) :
-		Posistion(posistion),
-		Direction(direction) {}
+		FIntVector origin = FIntVector(0),
+		TArray<FIntVector> posistions = TArray<FIntVector>(),
+		EDirection direction = EDirection::D_Forward,
+		bool border = false,
+		bool walkable = true) :
+			Origin(origin),
+			Posistions(posistions),
+			Direction(direction),
+			isBorder(border),
+			isWalkable(walkable){}
 };
 
 
