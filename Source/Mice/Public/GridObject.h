@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/BoxComponent.h"
 #include "GameFramework/Actor.h"
 #include "GridObject.generated.h"
 
@@ -25,25 +26,25 @@ struct FGridTransform
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		EDirection Direction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		TArray<FIntVector> Posistions;
+		TArray<FIntVector> WalkablePosistions;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TArray<FIntVector> BlockedTiles;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool isBorder;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		bool isWalkable;
 
 public:
 
 	FGridTransform(
 		FIntVector origin = FIntVector(0),
-		TArray<FIntVector> posistions = TArray<FIntVector>(),
+		TArray<FIntVector> walkablePosistions = TArray<FIntVector>(),
 		EDirection direction = EDirection::D_Forward,
-		bool border = false,
-		bool walkable = true) :
+		TArray<FIntVector> blockedTiles = TArray<FIntVector>(),
+		bool border = false) :
 			Origin(origin),
-			Posistions(posistions),
+			WalkablePosistions(walkablePosistions),
 			Direction(direction),
-			isBorder(border),
-			isWalkable(walkable){}
+			BlockedTiles(blockedTiles),
+			isBorder(border){}
 };
 
 

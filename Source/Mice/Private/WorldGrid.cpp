@@ -2,6 +2,7 @@
 
 #include "WorldGrid.h"
 #include "Algo/Reverse.h"
+#include "MGameInstance.h"
 #include "EngineUtils.h"
 #include "../Public/WorldGrid.h"
 
@@ -18,8 +19,8 @@ AWorldGrid::AWorldGrid()
 
 	width = 10;
 	height = 10;
-	spacing = 120;
-
+	spacing = 100.0f;
+	
 	CollisionExtent = FVector(55.0f, 55.0f, 10.0f);
 }
 
@@ -29,6 +30,7 @@ void AWorldGrid::BeginPlay()
 	Super::BeginPlay();
 
 	TArray<FGridTransform> trans;
+	TSet<FIntVector> nonTiles;
 
 	for (TActorIterator<AGridObject> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
@@ -36,17 +38,20 @@ void AWorldGrid::BeginPlay()
 		AGridObject* object = *ActorItr;
 
 		trans.Add(object->GridOrigin);
+		//object->GridOrigin.
 	}
+
+	//for (FGridTransform)
 
 	for (FGridTransform& tran : trans)
 	{
-		for (FIntVector& pos : tran.Posistions)
+		for (FIntVector& pos : tran.WalkablePosistions)
 		{
 			FIntVector loc = pos + tran.Origin;
 			int32 x = loc.X, y = loc.Y, z = loc.Z;
-			FVector vec = FVector((float)(x * spacing), (float)(y * spacing), (float)(z * spacing));
-
-			InstanceMesh->AddInstance(FTransform(vec));
+			FVector vec = FVector((float)(x * spacing), (float)(y * spacing), (float)(z * spacing)) + FVector(spacing/2, spacing/2, 0.0f);
+			/*
+			InstanceMesh->AddInstance(FTransform(vec + FVector(0.0f, 0.0f, 5.0f)));
 
 			UTextRenderComponent* text = NewObject<UTextRenderComponent>(this, UTextRenderComponent::StaticClass());
 			if (text) {
@@ -55,16 +60,16 @@ void AWorldGrid::BeginPlay()
 				//Attach the component to the root component
 				text->AttachToComponent(root, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 
-				FTransform textTrans = FTransform(FRotator(90.0f, 0.0f, 0.0f), vec, FVector(1.0f));
+				FTransform textTrans = FTransform(FRotator(90.0f, 0.0f, 0.0f), vec + FVector(0.0f, 0.0f, 10.0f), FVector(1.0f));
 				text->SetRelativeTransform(textTrans);
 			}
-
+			*/
 			UGridCollision* col = NewObject<UGridCollision>(this, UGridCollision::StaticClass());
 			if (col) {
 				col->RegisterComponent();
 				waste.Add(col);
 
-				col->SetBoxExtent(CollisionExtent, true);
+				col->SetBoxExtent(FVector(spacing / 2, spacing / 2, 10.0f), true);
 				col->pos = FIntVector(x, y, 0);
 				col->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
 				col->AttachToComponent(root, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
@@ -72,9 +77,10 @@ void AWorldGrid::BeginPlay()
 				FTransform colTrans = FTransform(FRotator(0.0f), vec);
 				col->SetRelativeTransform(colTrans);
 			}
-			gridTiles.Add(FIntVector(x, y, z), FGridTile(tran.isWalkable, col, text));
+			gridTiles.Add(FIntVector(x, y, z), FGridTile(true, col));
 		}
 	}
+
 }
 
 // Called every frame
@@ -90,7 +96,7 @@ FTransform AWorldGrid::VectorToWorldTransform(FIntVector pos)
 
 FTransform AWorldGrid::VectorToLocalTransform(FIntVector pos)
 {
-	FIntVector nPos = pos * spacing;
+	FIntVector nPos = (pos * spacing) + FIntVector(spacing /2, spacing / 2, 0);
 	return FTransform(FVector((float)nPos.X, (float)nPos.Y, (float)nPos.Z));
 }
 
@@ -184,6 +190,15 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 	//Empty the array and delete all it's components
 	
+	if (GetWorld()->GetGameInstance())
+	{
+		UMGameInstance* GameInstance = Cast<UMGameInstance>(GetWorld()->GetGameInstance());
+		if (GameInstance)
+		{
+			spacing = GameInstance->Spacing;
+		}
+	}
+
 	for (USceneComponent* elem : waste)
 	{
 		if (elem)
@@ -239,7 +254,10 @@ void AWorldGrid::DebugPath(TMap<FIntVector, int32> gScore)
 {
 	for (TPair<FIntVector, FGridTile>& tile : gridTiles)
 	{
-		tile.Value.DebugTextRender->SetText(TEXT("x"));
+		if (tile.Value.DebugTextRender)
+		{
+			tile.Value.DebugTextRender->SetText(TEXT("x"));
+		}
 	}
 
 	for (TPair<FIntVector, int32>& elem : gScore)
@@ -247,7 +265,10 @@ void AWorldGrid::DebugPath(TMap<FIntVector, int32> gScore)
 		FGridTile* tile = gridTiles.Find(elem.Key);
 		if (tile)
 		{
-			tile->DebugTextRender->SetText(FText::FromString(FString::FromInt(elem.Value)));
+			if (tile->DebugTextRender)
+			{
+				tile->DebugTextRender->SetText(FText::FromString(FString::FromInt(elem.Value)));
+			}
 		}
 	}
 }

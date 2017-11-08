@@ -2,6 +2,8 @@
 
 #include "MGameInstance.h"
 
-
+UMGameInstance::UMGameInstance() {
+	Spacing = 100.0f;
+}
 
 

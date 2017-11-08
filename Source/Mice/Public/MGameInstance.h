@@ -9,12 +9,14 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(config = Game)
 class MICE_API UMGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
+
+		UMGameInstance();
 	
-	
-	
-	
+public:
+	UPROPERTY(config)
+		float Spacing;
 };
