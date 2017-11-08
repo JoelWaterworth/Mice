@@ -29,58 +29,6 @@ void AWorldGrid::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TArray<FGridTransform> trans;
-	TSet<FIntVector> nonTiles;
-
-	for (TActorIterator<AGridObject> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-	{
-		// Access the subclass instance with the * or -> operators.
-		AGridObject* object = *ActorItr;
-
-		trans.Add(object->GridOrigin);
-		//object->GridOrigin.
-	}
-
-	//for (FGridTransform)
-
-	for (FGridTransform& tran : trans)
-	{
-		for (FIntVector& pos : tran.WalkablePosistions)
-		{
-			FIntVector loc = pos + tran.Origin;
-			int32 x = loc.X, y = loc.Y, z = loc.Z;
-			FVector vec = FVector((float)(x * spacing), (float)(y * spacing), (float)(z * spacing)) + FVector(spacing/2, spacing/2, 0.0f);
-			/*
-			InstanceMesh->AddInstance(FTransform(vec + FVector(0.0f, 0.0f, 5.0f)));
-
-			UTextRenderComponent* text = NewObject<UTextRenderComponent>(this, UTextRenderComponent::StaticClass());
-			if (text) {
-				text->RegisterComponent();
-				waste.Add(text);
-				//Attach the component to the root component
-				text->AttachToComponent(root, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-
-				FTransform textTrans = FTransform(FRotator(90.0f, 0.0f, 0.0f), vec + FVector(0.0f, 0.0f, 10.0f), FVector(1.0f));
-				text->SetRelativeTransform(textTrans);
-			}
-			*/
-			UGridCollision* col = NewObject<UGridCollision>(this, UGridCollision::StaticClass());
-			if (col) {
-				col->RegisterComponent();
-				waste.Add(col);
-
-				col->SetBoxExtent(FVector(spacing / 2, spacing / 2, 10.0f), true);
-				col->pos = FIntVector(x, y, 0);
-				col->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
-				col->AttachToComponent(root, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-
-				FTransform colTrans = FTransform(FRotator(0.0f), vec);
-				col->SetRelativeTransform(colTrans);
-			}
-			gridTiles.Add(FIntVector(x, y, z), FGridTile(true, col));
-		}
-	}
-
 }
 
 // Called every frame
@@ -120,7 +68,8 @@ TMap<FIntVector, FIntVector> AWorldGrid::CalculatePaths(AUnit * Unit, int32 Limi
 	TMap<FIntVector, int32> gScore = TMap<FIntVector, int32>();
 	gScore.Add(Unit->pos, 0);
 	TMap<FIntVector, FIntVector> roots = TMap<FIntVector, FIntVector>();
-	while (OpenSet.Num() > 0) {
+	while (OpenSet.Num() > 0)
+	{
 		FIntVector current = OpenSet[0];
 		OpenSet.RemoveAt(0);
 		CloseSet.Add(current);
@@ -129,8 +78,10 @@ TMap<FIntVector, FIntVector> AWorldGrid::CalculatePaths(AUnit * Unit, int32 Limi
 
 		for (FIntVector& neighbour : neighbours)
 		{
-			if (!CloseSet.Contains(neighbour)) {
-				if (!OpenSet.Contains(neighbour)) {
+			if (!CloseSet.Contains(neighbour)) 
+			{
+				if (!OpenSet.Contains(neighbour)) 
+				{
 					OpenSet.Add(neighbour);
 				}
 				int32* y = gScore.Find(current);
@@ -176,7 +127,8 @@ TArray<FIntVector> AWorldGrid::CreatePathFromRoutes(TMap<FIntVector, FIntVector>
 		if (current) {
 			path.Add(*current);
 		}
-		else {
+		else
+		{
 			break;
 		}
 	}
@@ -199,6 +151,17 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 		}
 	}
 
+	TArray<UBoxComponent*> boxs;
+	GetComponents(boxs);
+
+	for (UBoxComponent* box : boxs)
+	{
+		if (box)
+		{
+			box->DestroyComponent();
+		}
+	}
+	/*
 	for (USceneComponent* elem : waste)
 	{
 		if (elem)
@@ -206,46 +169,50 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 			elem->DestroyComponent();
 		}
 	}
-	/*
-	waste.Empty();
-	gridTiles.Empty();
-	InstanceMesh->ClearInstances();
-
-	for (int x = 0; x < width; x++)
-	{
-		for (int y = 0; y < height; y++)
-		{
-			InstanceMesh->AddInstance(FTransform(FVector((float)(x * spacing), (float)(y * spacing), 0.0f)));
-
-			UTextRenderComponent* text = NewObject<UTextRenderComponent>(this, UTextRenderComponent::StaticClass());
-			if (text) {
-				text->RegisterComponent();
-				waste.Add(text);
-				//Attach the component to the root component
-				text->AttachToComponent(root, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-
-				FTransform textTrans = FTransform(FRotator(90.0f, 0.0f, 0.0f), FVector((float)(x * spacing), (float)(y * spacing), 10.0f), FVector(1.0f));
-				text->SetRelativeTransform(textTrans);
-			}
-
-			UGridCollision* col = NewObject<UGridCollision>(this, UGridCollision::StaticClass());
-			if (col) {
-				col->RegisterComponent();
-				waste.Add(col);
-
-				col->SetBoxExtent(CollisionExtent, true);
-				col->pos = FIntVector(x, y, 0);
-				col->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
-				col->AttachToComponent(root, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-
-				FTransform colTrans = FTransform(FRotator(0.0f), FVector((float)(x * spacing), (float)(y * spacing), 0.0f), FVector(1.0f));
-				col->SetRelativeTransform(colTrans);
-			}
-			gridTiles.Add(FIntVector(x,y, 0), FGridTile(true,col,text));
-		}
-	}
 	*/
 
+	//waste.Empty();
+	gridTiles.Empty();
+
+	TArray<FGridTransform> trans;
+	TSet<FIntVector> nonTiles;
+
+	for (TActorIterator<AGridObject> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		// Access the subclass instance with the * or -> operators.
+		AGridObject* object = *ActorItr;
+		trans.Add(object->GridOrigin);
+		for (FIntVector& pos : object->GridOrigin.BlockedTiles) {
+			nonTiles.Add(pos + object->GridOrigin.Origin);
+		}
+	}
+
+	for (FGridTransform& tran : trans)
+	{
+		for (FIntVector& pos : tran.WalkablePosistions)
+		{
+			if (!nonTiles.Contains(pos)) {
+				FIntVector loc = pos + tran.Origin;
+				int32 x = loc.X, y = loc.Y, z = loc.Z;
+				FVector vec = FVector((float)(x * spacing), (float)(y * spacing), (float)(z * spacing)) + FVector(spacing / 2, spacing / 2, 0.0f);
+
+				UGridCollision* col = NewObject<UGridCollision>(this, UGridCollision::StaticClass());
+				if (col) {
+					col->RegisterComponent();
+					waste.Add(col);
+					col->SetBoxExtent(FVector(spacing / 2, spacing / 2, 10.0f), true);
+					col->pos = FIntVector(x, y, 0);
+					col->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
+					col->AttachToComponent(root, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+					FTransform colTrans = FTransform(FRotator(0.0f), vec);
+					col->SetRelativeTransform(colTrans);
+				}
+				gridTiles.Add(FIntVector(x, y, z), FGridTile(true, col));
+			}
+		}
+	}
+
+	Refresh = false;
 	//Register all the components
 	RegisterAllComponents();
 }
@@ -287,14 +254,13 @@ TArray<FIntVector> AWorldGrid::GetNeighbours(FIntVector origin)
 	tNeighbours.Add(FIntVector( 0, -1, 0)	+ origin);
 	tNeighbours.Add(FIntVector( 1, -1, 0)	+ origin);
 
-	for (FIntVector& neighbour : tNeighbours)
+	for (FIntVector& pos : tNeighbours)
 	{
-		if (
-			(neighbour.X >= 0 && neighbour.X < width) && 
-			(neighbour.Y >= 0 && neighbour.Y < height))
+		if (gridTiles.Contains(pos))
 		{
-			neighbours.Add(neighbour);
+			neighbours.Add(pos);
 		}
 	}
+
 	return neighbours;
 }

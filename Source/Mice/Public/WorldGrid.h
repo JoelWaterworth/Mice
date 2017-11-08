@@ -59,6 +59,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Init")
 		int32 height;
 
+	UPROPERTY(EditAnywhere, Category = "Init")
+		bool Refresh;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Init")
 		int32 width;
 
