@@ -6,6 +6,8 @@
 #include "EngineUtils.h"
 #include "../Public/WorldGrid.h"
 
+DEFINE_LOG_CATEGORY(LogWorld);
+#define LOCTEXT_NAMESPACE "World grid" 
 
 // Sets default values
 AWorldGrid::AWorldGrid()
@@ -29,6 +31,229 @@ void AWorldGrid::BeginPlay()
 {
 	Super::BeginPlay();
 
+}
+
+TArray<FIntVector> AWorldGrid::PlotPine(FIntVector v0, FIntVector v1)
+{
+	TArray<FIntVector> line = TArray<FIntVector>();
+	int32 i = 0;
+	FIntVector step = FIntVector(0, 0, 0);
+	int32 error_0, errorprev_0, error_1, errorprev_1 = 0;
+	FIntVector vec = v0;
+	int32 ddy, ddx, ddz;
+	FIntVector d = v1 - v0;
+	line.Add(vec);
+
+	SetDeltaNStep(d.Y, step.Y);
+	SetDeltaNStep(d.X, step.X);
+	SetDeltaNStep(d.Z, step.Z);
+	UE_LOG(LogWorld, Warning, TEXT("step is %s"), *step.ToString());
+	ddy = 2 * d.Y;
+	ddx = 2 * d.X;
+	ddz = 2 * d.Z;
+	if (ddx >= ddy && ddx >= ddz)
+	{
+		error_0 = d.X;
+		errorprev_0 = d.X;
+		error_1 = d.X;
+		errorprev_1 = d.X;
+		for(i = 0; i < d.X; i++) {
+			vec.X += step.X;
+			error_0 += ddy;
+			error_1 += ddz;
+			if (error_0 > ddx && error_1 > ddx)
+			{
+				vec.Y += step.Y;
+				vec.Z += step.Z;
+				error_0 -= ddx;
+				error_1 -= ddx;
+				if (error_0 + errorprev_0 < ddx){
+					line.Add(FIntVector(vec.X, vec.Y - step.Y, vec.Z - step.Z));
+				}
+				else if (error_0 + errorprev_0 > ddx)
+				{
+					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
+				}
+				else {
+					line.Add(FIntVector(vec.X, vec.Y - step.Y, vec.Z));
+					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
+					line.Add(FIntVector(vec.X, vec.Y, vec.Z - step.Z));
+				}
+			}
+			else if (error_0 > ddx)
+			{
+				vec.Y += step.Y;
+				error_0 -= ddx;
+				if (error_0 + errorprev_0 < ddx)
+				{
+					line.Add(FIntVector(vec.X, vec.Y - step.Y, vec.Z));
+				}
+				else if (error_0 + errorprev_0 > ddx)
+				{
+					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
+				}
+				else {
+					line.Add(FIntVector(vec.X, vec.Y - step.Y, vec.Z));
+					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
+				}
+			}
+			else if (error_1 > ddx)
+			{
+				vec.Z += step.Z;
+				error_1 -= ddx;
+				if (error_1 + errorprev_1 < ddx)
+				{
+					line.Add(FIntVector(vec.X, vec.Y, vec.Z - step.Z));
+				}
+				else if (error_1 + errorprev_1 > ddx)
+				{
+					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
+				}
+				else
+				{
+					line.Add(FIntVector(vec.X, vec.Y, vec.Z - step.Z));
+					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
+				}
+			}
+			errorprev_0 = error_0;
+			errorprev_1 = error_1;
+		}
+	}
+	else if (ddy >= ddz)
+	{
+		error_0 = d.Y;
+		errorprev_0 = d.Y;
+		error_1 = d.Y;
+		errorprev_1 = d.Y;
+		for (i = 0; i < d.Y; i++) {
+			vec.Y += step.Y;
+			error_0 += ddx;
+			error_1 += ddz;
+			if (error_0 > ddy && error_1 > ddy)
+			{
+				vec.X += step.X;
+				vec.Z += step.Z;
+				error_0 -= ddy;
+				error_1 -= ddy;
+				if (error_0 + errorprev_0 < ddy) {
+					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
+				}
+				else if (error_0 + errorprev_0 > ddy) {
+					line.Add(FIntVector(vec.X, vec.Y - step.Y, vec.Z));
+				}
+				else {
+					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
+					line.Add(FIntVector(vec.X, vec.Y - step.Y, vec.Z));
+				}
+			}
+			else if (error_0 > ddy)
+			{
+				vec.X += step.X;
+				error_0 -= ddx;
+				if (error_0 + errorprev_0 < ddx)
+				{
+					line.Add(FIntVector(vec.X, vec.Y - step.Y, vec.Z));
+				}
+				else if (error_0 + errorprev_0 > ddx)
+				{
+					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
+				}
+				else {
+					line.Add(FIntVector(vec.X, vec.Y - step.Y, vec.Z));
+					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
+				}
+			}
+			else if (error_1 > ddy)
+			{
+				vec.Z += step.Z;
+				error_1 -= ddx;
+				if (error_1 + errorprev_1 < ddx)
+				{
+					line.Add(FIntVector(vec.X, vec.Y, vec.Z - step.Z));
+				}
+				else if (error_1 + errorprev_1 > ddx)
+				{
+					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
+				}
+				else
+				{
+					line.Add(FIntVector(vec.X, vec.Y, vec.Z - step.Z));
+					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
+				}
+			}
+			errorprev_0 = error_0;
+		}
+	}
+	else
+	{
+		error_0 = d.Z;
+		errorprev_0 = d.Z;
+		error_1 = d.Z;
+		errorprev_1 = d.Z;
+		for (i = 0; i < d.Y; i++) {
+			vec.Z += step.Z;
+			error_0 += ddy;
+			error_1 += ddx;
+			if (error_0 > ddz && error_1 > ddz)
+			{
+				vec.Y += step.Y;
+				vec.X += step.X;
+				error_0 -= ddx;
+				error_1 -= ddx;
+				if (error_0 + errorprev_0 < ddz)
+				{
+					line.Add(FIntVector(vec.X, vec.Y - step.Y, vec.Z - step.Z));
+				}
+				else if (error_0 + errorprev_0 > ddz)
+				{
+					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
+				}
+				else {
+					line.Add(FIntVector(vec.X, vec.Y - step.Y, vec.Z));
+					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
+					line.Add(FIntVector(vec.X, vec.Y, vec.Z - step.Z));
+				}
+			}
+			else if (error_0 > ddz)
+			{
+				vec.Y += step.Y;
+				error_0 -= ddx;
+				if (error_0 + errorprev_0 < ddz)
+				{
+					line.Add(FIntVector(vec.X, vec.Y - step.Y, vec.Z));
+				}
+				else if (error_0 + errorprev_0 > ddz)
+				{
+					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
+				}
+				else
+				{
+					line.Add(FIntVector(vec.X, vec.Y - step.Y, vec.Z));
+					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
+				}
+			}
+			else if (error_1 > ddz)
+			{
+				vec.X += step.X;
+				error_1 -= ddz;
+				if (error_1 + errorprev_1 < ddz)
+				{
+					line.Add(FIntVector(vec.X, vec.Y, vec.Z - step.Z));
+				}
+				else if (error_1 + errorprev_1 > ddz)
+				{
+					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
+				}
+				else {
+					line.Add(FIntVector(vec.X, vec.Y, vec.Z - step.Z));
+					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
+				}
+			}
+			errorprev_0 = error_0;
+			errorprev_1 = error_1;
+			}
+		}
+	return line;
 }
 
 // Called every frame
@@ -223,7 +448,7 @@ void AWorldGrid::DebugPath(TMap<FIntVector, int32> gScore)
 	{
 		if (tile.Value.DebugTextRender)
 		{
-			tile.Value.DebugTextRender->SetText(TEXT("x"));
+			tile.Value.DebugTextRender->SetText(LOCTEXT("","x"));
 		}
 	}
 
@@ -244,23 +469,37 @@ TArray<FIntVector> AWorldGrid::GetNeighbours(FIntVector origin)
 {
 	TArray<FIntVector> neighbours = TArray<FIntVector>();
 
-	TArray<FIntVector> tNeighbours = TArray<FIntVector>();
-	tNeighbours.Add(FIntVector(-1,  1, 0)	+ origin);
-	tNeighbours.Add(FIntVector( 0,  1, 0)	+ origin);
-	tNeighbours.Add(FIntVector( 1,  1, 0)	+ origin);
-	tNeighbours.Add(FIntVector(-1,  0, 0)	+ origin);
-	tNeighbours.Add(FIntVector( 1,  0, 0)	+ origin);
-	tNeighbours.Add(FIntVector(-1, -1, 0)	+ origin);
-	tNeighbours.Add(FIntVector( 0, -1, 0)	+ origin);
-	tNeighbours.Add(FIntVector( 1, -1, 0)	+ origin);
-
-	for (FIntVector& pos : tNeighbours)
+	for (int32 x = -1; x < 2; x++)
 	{
-		if (gridTiles.Contains(pos))
+		for (int32 y = -1; y < 2; y++)
 		{
-			neighbours.Add(pos);
+			for (int32 z = -1; z < 2; z++)
+			{
+				if (!(x == 0 && y == 0))
+				{
+					FIntVector pos = FIntVector(x, y, z) + origin;
+					if (gridTiles.Contains(pos))
+					{
+						neighbours.Add(pos);
+					}
+				}
+			}
 		}
 	}
-
 	return neighbours;
 }
+
+void AWorldGrid::SetDeltaNStep(int32 & delta, int32 & step)
+{
+	if (delta < 0)
+	{
+		step = -1;
+		delta = -delta;
+	}
+	else 
+	{
+		step = 1;
+	}
+}
+
+#undef LOCTEXT_NAMESPACE 

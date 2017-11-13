@@ -11,6 +11,8 @@
 #include "GameFramework/Actor.h"
 #include "WorldGrid.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogWorld, Log, All);
+
 USTRUCT(BlueprintType)
 struct FGridTile
 {
@@ -95,7 +97,14 @@ protected:
 
 	TArray<AGridObject*> GridObjects;
 
-public:	
+private:
+	static void SetDeltaNStep(int32& delta, int32& step);
+
+
+public:
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	static TArray<FIntVector> PlotPine(FIntVector v0, FIntVector v1);
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
