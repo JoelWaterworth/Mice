@@ -9,6 +9,8 @@
 #include "Classes/Engine/World.h"
 #include "Unit.h"
 #include "EngineUtils.h"
+#include <EngineGlobals.h>
+#include <Runtime/Engine/Classes/Engine/Engine.h>
 #include "Kismet/GameplayStatics.h"
 
 
@@ -26,10 +28,15 @@ void ASimultaneousGameMode::PostLogin(APlayerController * NewPlayer)
 	// Place player on a team before Super (VoIP team based init, findplayerstart, etc)
 	AMPlayerState* NewPlayerState = Cast<AMPlayerState>(NewPlayer->PlayerState);
 	const ETeam TeamNum = ChooseTeam(NewPlayerState);
-	NewPlayerState->team = TeamNum;
-	AMPlayerController* playercontroller = Cast<AMPlayerController>(NewPlayer);
-	NewPlayerState->OnColorChangeDelegate.BindUObject(playercontroller, &AMPlayerController::ClientPlayerUpdate);
-	playercontroller->UpdatePlayerTeam();
+	NewPlayerState->SetTeam(TeamNum);
+	/*AMPlayerController* playercontroller = Cast<AMPlayerController>(NewPlayer);
+	if (playercontroller) {
+		NewPlayerState->OnColorChangeDelegate.BindUObject(playercontroller, &AMPlayerController::ClientPlayerUpdate);
+		playercontroller->ClientPlayerUpdate();
+	}
+	else {
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("player controller invalid"));
+	}*/
 	Super::PostLogin(NewPlayer);
 }
 
@@ -99,13 +106,12 @@ void ASimultaneousGameMode::BeginPlay()
 ETeam ASimultaneousGameMode::ChooseTeam(APlayerState * playerState)
 {
 	int32 count = GameState->PlayerArray.Num();
-	if (count == 1) {
+	if (count % 2) {
 		return ETeam::T_Blue;
 	}
 	else {
 		return ETeam::T_Red;
 	}
-	
 }
 
 AActor * ASimultaneousGameMode::ChoosePlayerStart_Implementation(AController * Player)

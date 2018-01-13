@@ -13,7 +13,9 @@ enum class EDirection : uint8
 	D_Forward 	UMETA(DisplayName = "Forward"),
 	D_Backward 	UMETA(DisplayName = "Backward"),
 	D_Rightward UMETA(DisplayName = "Rightward"),
-	D_Leftward 	UMETA(DisplayName = "Leftward")
+	D_Leftward 	UMETA(DisplayName = "Leftward"),
+	D_Upward	UMETA(DisplayName = "Upward"),
+	D_Downward 	UMETA(DisplayName = "Downward"),
 };
 
 USTRUCT(BlueprintType)
@@ -48,15 +50,13 @@ public:
 };
 
 
+USTRUCT(BlueprintType)
 struct FGridObjectTree
 {
-
-public:
+	GENERATED_BODY()
 
 		FGridTransform Trans;
-	
 		TArray<FGridObjectTree> Children;
-	
 public:
 
 	FGridObjectTree(

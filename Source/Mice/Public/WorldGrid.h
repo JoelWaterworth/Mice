@@ -14,6 +14,24 @@
 DECLARE_LOG_CATEGORY_EXTERN(LogWorld, Log, All);
 
 USTRUCT(BlueprintType)
+struct FObstucle {
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TArray<EDirection> direction;//because mutlple walls can occupy the same wall tile this must be an array.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool isboarder;
+
+public:
+
+	FObstucle(
+		bool b = false,
+		TArray<EDirection> d = TArray<EDirection>()) :
+		direction(d),
+		isboarder(b) {}
+};
+
+USTRUCT(BlueprintType)
 struct FGridTile
 {
 	GENERATED_BODY()
@@ -97,13 +115,14 @@ protected:
 
 	TArray<AGridObject*> GridObjects;
 
+	TMap<FIntVector, FObstucle> obstucles;
+
 private:
 	static void SetDeltaNStep(int32& delta, int32& step);
 
-
 public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	static TArray<FIntVector> PlotPine(FIntVector v0, FIntVector v1);
+	bool PlotPine(FVector v0, FVector v1);
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

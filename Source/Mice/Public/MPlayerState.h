@@ -25,13 +25,18 @@ class MICE_API AMPlayerState : public APlayerState
 	
 public:
 	AMPlayerState();
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Team")
+	UPROPERTY(Transient, ReplicatedUsing = OnRep_TeamColor, VisibleAnywhere, BlueprintReadWrite, Category = "Team")
 		ETeam team;
 
 	FOnPlayerColorChange OnColorChangeDelegate;
 
 	//Do not store the team arg in the player pawn
 	void UpdatePlayerTeam();
+
+	UFUNCTION()
+		void OnRep_TeamColor();
+
+	void SetTeam(ETeam tm);
 
 protected:
 	virtual void BeginPlay() override;

@@ -31,10 +31,10 @@ public:
 		TArray<UMCommand*> commands;
 
 	UFUNCTION(Reliable, Client)
-		void ClientPlayerUpdate();
+		void ClientPlayerUpdate(ETeam team);
 
 	UFUNCTION(BlueprintNativeEvent)
-		void UpdatePlayerTeam();
+		void UpdatePlayerTeam(ETeam team);
 protected:
 
 	AUnit* Selected;

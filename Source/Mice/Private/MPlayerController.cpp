@@ -39,14 +39,14 @@ void AMPlayerController::ServerSubmitCommands_Implementation()
 	}
 }
 
-void AMPlayerController::UpdatePlayerTeam_Implementation()
+void AMPlayerController::UpdatePlayerTeam_Implementation(ETeam team)
 {
 
 }
 
-void AMPlayerController::ClientPlayerUpdate_Implementation()
+void AMPlayerController::ClientPlayerUpdate_Implementation(ETeam team)
 {
-	UpdatePlayerTeam();
+	UpdatePlayerTeam(team);
 }
 
 void AMPlayerController::BeginPlay()

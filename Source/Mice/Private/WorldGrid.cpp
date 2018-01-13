@@ -4,6 +4,7 @@
 #include "Algo/Reverse.h"
 #include "MGameInstance.h"
 #include "EngineUtils.h"
+#include "VoxelLineTraceIterator.h"
 #include "../Public/WorldGrid.h"
 
 DEFINE_LOG_CATEGORY(LogWorld);
@@ -33,227 +34,26 @@ void AWorldGrid::BeginPlay()
 
 }
 
-TArray<FIntVector> AWorldGrid::PlotPine(FIntVector v0, FIntVector v1)
+bool AWorldGrid::PlotPine(FVector start, FVector end)
 {
-	TArray<FIntVector> line = TArray<FIntVector>();
-	int32 i = 0;
-	FIntVector step = FIntVector(0, 0, 0);
-	int32 error_0, errorprev_0, error_1, errorprev_1 = 0;
-	FIntVector vec = v0;
-	int32 ddy, ddx, ddz;
-	FIntVector d = v1 - v0;
-	line.Add(vec);
-
-	SetDeltaNStep(d.Y, step.Y);
-	SetDeltaNStep(d.X, step.X);
-	SetDeltaNStep(d.Z, step.Z);
-	UE_LOG(LogWorld, Warning, TEXT("step is %s"), *step.ToString());
-	ddy = 2 * d.Y;
-	ddx = 2 * d.X;
-	ddz = 2 * d.Z;
-	if (ddx >= ddy && ddx >= ddz)
-	{
-		error_0 = d.X;
-		errorprev_0 = d.X;
-		error_1 = d.X;
-		errorprev_1 = d.X;
-		for(i = 0; i < d.X; i++) {
-			vec.X += step.X;
-			error_0 += ddy;
-			error_1 += ddz;
-			if (error_0 > ddx && error_1 > ddx)
-			{
-				vec.Y += step.Y;
-				vec.Z += step.Z;
-				error_0 -= ddx;
-				error_1 -= ddx;
-				if (error_0 + errorprev_0 < ddx){
-					line.Add(FIntVector(vec.X, vec.Y - step.Y, vec.Z - step.Z));
-				}
-				else if (error_0 + errorprev_0 > ddx)
-				{
-					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
-				}
-				else {
-					line.Add(FIntVector(vec.X, vec.Y - step.Y, vec.Z));
-					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
-					line.Add(FIntVector(vec.X, vec.Y, vec.Z - step.Z));
-				}
+	FIntVector endtile = FIntVector(end);
+	UVoxelLineTraceIterator* Component = NewObject<UVoxelLineTraceIterator>(this, UVoxelLineTraceIterator::StaticClass());
+	Component->start = start;
+	Component->direction = end - start;
+	bool b = true;
+	for (int i = 0; i < 20; i++) {
+		FIteratorReturn iter = Component->next();
+		for (auto& voxel_res : iter.voxels) {
+			auto k = obstucles.Find(voxel_res.voxels);
+			if (endtile == voxel_res.voxels) {
+				return true;
 			}
-			else if (error_0 > ddx)
-			{
-				vec.Y += step.Y;
-				error_0 -= ddx;
-				if (error_0 + errorprev_0 < ddx)
-				{
-					line.Add(FIntVector(vec.X, vec.Y - step.Y, vec.Z));
-				}
-				else if (error_0 + errorprev_0 > ddx)
-				{
-					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
-				}
-				else {
-					line.Add(FIntVector(vec.X, vec.Y - step.Y, vec.Z));
-					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
-				}
+			else if (k) {
+				return false;
 			}
-			else if (error_1 > ddx)
-			{
-				vec.Z += step.Z;
-				error_1 -= ddx;
-				if (error_1 + errorprev_1 < ddx)
-				{
-					line.Add(FIntVector(vec.X, vec.Y, vec.Z - step.Z));
-				}
-				else if (error_1 + errorprev_1 > ddx)
-				{
-					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
-				}
-				else
-				{
-					line.Add(FIntVector(vec.X, vec.Y, vec.Z - step.Z));
-					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
-				}
-			}
-			errorprev_0 = error_0;
-			errorprev_1 = error_1;
 		}
 	}
-	else if (ddy >= ddz)
-	{
-		error_0 = d.Y;
-		errorprev_0 = d.Y;
-		error_1 = d.Y;
-		errorprev_1 = d.Y;
-		for (i = 0; i < d.Y; i++) {
-			vec.Y += step.Y;
-			error_0 += ddx;
-			error_1 += ddz;
-			if (error_0 > ddy && error_1 > ddy)
-			{
-				vec.X += step.X;
-				vec.Z += step.Z;
-				error_0 -= ddy;
-				error_1 -= ddy;
-				if (error_0 + errorprev_0 < ddy) {
-					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
-				}
-				else if (error_0 + errorprev_0 > ddy) {
-					line.Add(FIntVector(vec.X, vec.Y - step.Y, vec.Z));
-				}
-				else {
-					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
-					line.Add(FIntVector(vec.X, vec.Y - step.Y, vec.Z));
-				}
-			}
-			else if (error_0 > ddy)
-			{
-				vec.X += step.X;
-				error_0 -= ddx;
-				if (error_0 + errorprev_0 < ddx)
-				{
-					line.Add(FIntVector(vec.X, vec.Y - step.Y, vec.Z));
-				}
-				else if (error_0 + errorprev_0 > ddx)
-				{
-					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
-				}
-				else {
-					line.Add(FIntVector(vec.X, vec.Y - step.Y, vec.Z));
-					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
-				}
-			}
-			else if (error_1 > ddy)
-			{
-				vec.Z += step.Z;
-				error_1 -= ddx;
-				if (error_1 + errorprev_1 < ddx)
-				{
-					line.Add(FIntVector(vec.X, vec.Y, vec.Z - step.Z));
-				}
-				else if (error_1 + errorprev_1 > ddx)
-				{
-					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
-				}
-				else
-				{
-					line.Add(FIntVector(vec.X, vec.Y, vec.Z - step.Z));
-					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
-				}
-			}
-			errorprev_0 = error_0;
-		}
-	}
-	else
-	{
-		error_0 = d.Z;
-		errorprev_0 = d.Z;
-		error_1 = d.Z;
-		errorprev_1 = d.Z;
-		for (i = 0; i < d.Y; i++) {
-			vec.Z += step.Z;
-			error_0 += ddy;
-			error_1 += ddx;
-			if (error_0 > ddz && error_1 > ddz)
-			{
-				vec.Y += step.Y;
-				vec.X += step.X;
-				error_0 -= ddx;
-				error_1 -= ddx;
-				if (error_0 + errorprev_0 < ddz)
-				{
-					line.Add(FIntVector(vec.X, vec.Y - step.Y, vec.Z - step.Z));
-				}
-				else if (error_0 + errorprev_0 > ddz)
-				{
-					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
-				}
-				else {
-					line.Add(FIntVector(vec.X, vec.Y - step.Y, vec.Z));
-					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
-					line.Add(FIntVector(vec.X, vec.Y, vec.Z - step.Z));
-				}
-			}
-			else if (error_0 > ddz)
-			{
-				vec.Y += step.Y;
-				error_0 -= ddx;
-				if (error_0 + errorprev_0 < ddz)
-				{
-					line.Add(FIntVector(vec.X, vec.Y - step.Y, vec.Z));
-				}
-				else if (error_0 + errorprev_0 > ddz)
-				{
-					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
-				}
-				else
-				{
-					line.Add(FIntVector(vec.X, vec.Y - step.Y, vec.Z));
-					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
-				}
-			}
-			else if (error_1 > ddz)
-			{
-				vec.X += step.X;
-				error_1 -= ddz;
-				if (error_1 + errorprev_1 < ddz)
-				{
-					line.Add(FIntVector(vec.X, vec.Y, vec.Z - step.Z));
-				}
-				else if (error_1 + errorprev_1 > ddz)
-				{
-					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
-				}
-				else {
-					line.Add(FIntVector(vec.X, vec.Y, vec.Z - step.Z));
-					line.Add(FIntVector(vec.X - step.X, vec.Y, vec.Z));
-				}
-			}
-			errorprev_0 = error_0;
-			errorprev_1 = error_1;
-			}
-		}
-	return line;
+	return false;
 }
 
 // Called every frame
@@ -386,7 +186,6 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 			box->DestroyComponent();
 		}
 	}
-	/*
 	for (USceneComponent* elem : waste)
 	{
 		if (elem)
@@ -394,13 +193,11 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 			elem->DestroyComponent();
 		}
 	}
-	*/
 
-	//waste.Empty();
+	waste.Empty();
 	gridTiles.Empty();
 
 	TArray<FGridTransform> trans;
-	TSet<FIntVector> nonTiles;
 
 	for (TActorIterator<AGridObject> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
@@ -408,7 +205,7 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 		AGridObject* object = *ActorItr;
 		trans.Add(object->GridOrigin);
 		for (FIntVector& pos : object->GridOrigin.BlockedTiles) {
-			nonTiles.Add(pos + object->GridOrigin.Origin);
+			obstucles.Add(pos + object->GridOrigin.Origin, FObstucle());
 		}
 	}
 
@@ -416,7 +213,7 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 	{
 		for (FIntVector& pos : tran.WalkablePosistions)
 		{
-			if (!nonTiles.Contains(pos)) {
+			if (!obstucles.Contains(pos)) {
 				FIntVector loc = pos + tran.Origin;
 				int32 x = loc.X, y = loc.Y, z = loc.Z;
 				FVector vec = FVector((float)(x * spacing), (float)(y * spacing), (float)(z * spacing)) + FVector(spacing / 2, spacing / 2, 0.0f);

@@ -14,13 +14,16 @@ AGridObject::AGridObject()
 
 void AGridObject::PostEditMove(bool bFinished)
 {
-	
 	if (bFinished && RootComponent != nullptr && GetWorld() != nullptr)
 	{
 		auto loc = GetActorLocation();
 
 		TArray<AActor*> worldGrids;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWorldGrid::StaticClass(), worldGrids);
+		if (worldGrids.Num() == 0) {
+			AActor::PostEditMove(bFinished);
+			return;
+		};
 		AWorldGrid* worldGrid = Cast<AWorldGrid>(worldGrids[0]);
 		if (worldGrid)
 		{
