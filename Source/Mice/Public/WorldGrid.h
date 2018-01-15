@@ -92,10 +92,10 @@ public:
 		FVector CollisionExtent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Foo")
-	TMap<FIntVector, FGridTile> gridTiles;
+		TMap<FIntVector, FGridTile> gridTiles;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garbage")
-	TArray<USceneComponent*> waste;
+		TArray<USceneComponent*> waste;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Points")
 		TArray<FIntVector> BlueSpawnPoints;
@@ -113,16 +113,18 @@ protected:
 
 	TArray<FIntVector> GetNeighbours(FIntVector origin);
 
-	TArray<AGridObject*> GridObjects;
+	UPROPERTY()
+		TMap<FIntVector, FObstucle> obstucles;
 
-	TMap<FIntVector, FObstucle> obstucles;
+	UPROPERTY()
+		TArray<AGridObject*> GridObjects;
 
 private:
 	static void SetDeltaNStep(int32& delta, int32& step);
 
 public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	bool PlotPine(FVector v0, FVector v1);
+	bool PlotLine(FVector start, FVector end);
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

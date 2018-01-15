@@ -29,14 +29,6 @@ void ASimultaneousGameMode::PostLogin(APlayerController * NewPlayer)
 	AMPlayerState* NewPlayerState = Cast<AMPlayerState>(NewPlayer->PlayerState);
 	const ETeam TeamNum = ChooseTeam(NewPlayerState);
 	NewPlayerState->SetTeam(TeamNum);
-	/*AMPlayerController* playercontroller = Cast<AMPlayerController>(NewPlayer);
-	if (playercontroller) {
-		NewPlayerState->OnColorChangeDelegate.BindUObject(playercontroller, &AMPlayerController::ClientPlayerUpdate);
-		playercontroller->ClientPlayerUpdate();
-	}
-	else {
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("player controller invalid"));
-	}*/
 	Super::PostLogin(NewPlayer);
 }
 

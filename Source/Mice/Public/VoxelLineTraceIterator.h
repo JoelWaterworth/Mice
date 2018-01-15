@@ -50,7 +50,9 @@ class MICE_API UVoxelLineTraceIterator : public UObject
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Init")
 	FVector start;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Init")
 	FVector direction;
 	UFUNCTION(BlueprintCallable)
 		FIteratorReturn next();

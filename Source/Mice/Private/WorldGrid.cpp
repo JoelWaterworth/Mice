@@ -34,21 +34,32 @@ void AWorldGrid::BeginPlay()
 
 }
 
-bool AWorldGrid::PlotPine(FVector start, FVector end)
+bool AWorldGrid::PlotPine(FVector s, FVector e)
 {
+	FVector start = s / 100.0f;
+	FVector end = e / 100.0f;
+	UE_LOG(LogWorld, Log, TEXT("number of obstructions %d"), obstucles.Num());
+	UE_LOG(LogWorld, Log, TEXT("PlotLine start %s, end %s"),
+		*start.ToString(), *end.ToString());
 	FIntVector endtile = FIntVector(end);
 	UVoxelLineTraceIterator* Component = NewObject<UVoxelLineTraceIterator>(this, UVoxelLineTraceIterator::StaticClass());
 	Component->start = start;
 	Component->direction = end - start;
-	bool b = true;
-	for (int i = 0; i < 20; i++) {
+	UE_LOG(LogWorld, Log, TEXT("direction %s and start %s"), *Component->direction.ToString(), *Component->start.ToString());
+	for (int i = 0; i < 20; i++)
+	{
 		FIteratorReturn iter = Component->next();
-		for (auto& voxel_res : iter.voxels) {
-			auto k = obstucles.Find(voxel_res.voxels);
-			if (endtile == voxel_res.voxels) {
+		UE_LOG(LogWorld, Log, TEXT("start %s"), *Component->start.ToString());
+		for (auto& voxel_res : iter.voxels)
+		{
+			UE_LOG(LogWorld, Log, TEXT("voxels %s"), *voxel_res.voxels.ToString());
+			FObstucle* k = obstucles.Find(voxel_res.voxels);
+			if (endtile == voxel_res.voxels)
+			{
 				return true;
 			}
-			else if (k) {
+			else if (k != NULL)
+			{
 				return false;
 			}
 		}
@@ -166,7 +177,7 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 	//Empty the array and delete all it's components
-	
+
 	if (GetWorld()->GetGameInstance())
 	{
 		UMGameInstance* GameInstance = Cast<UMGameInstance>(GetWorld()->GetGameInstance());
@@ -196,6 +207,7 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 
 	waste.Empty();
 	gridTiles.Empty();
+	obstucles.Empty();
 
 	TArray<FGridTransform> trans;
 

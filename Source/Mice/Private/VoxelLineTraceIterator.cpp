@@ -8,11 +8,11 @@ FIteratorReturn UVoxelLineTraceIterator::next()
 {
 	auto fx = [](float& t, float direction, float start)  {
 		float a = FMath::FloorToFloat(start);
-		if (direction > 0.0) {
-			a += 1.0;
+		if (direction > 0.0f) {
+			a += 1.0f;
 		}
 		else if (start == a) {
-			a -= 1.0;
+			a -= 1.0f;
 		}
 		if (direction != 0.0f) {
 			t = FMath::Min(t, (a - start) / direction);
@@ -25,7 +25,7 @@ FIteratorReturn UVoxelLineTraceIterator::next()
 	fx(t, direction.Y, start.Y);
 	fx(t, direction.Z, start.Z);
 
-	FVector out = start * direction * t;
+	FVector out = start + (direction * t);
 	TArray<FVoxelResult> voxels = TArray<FVoxelResult>();
 	TArray<EDirection> dir = TArray<EDirection>();
 
@@ -60,8 +60,9 @@ FIteratorReturn UVoxelLineTraceIterator::next()
 		dir.Push(out.Z < 0 ? EDirection::D_Upward : EDirection::D_Downward);
 	}
 	voxels.Push(FVoxelResult(
-		FIntVector(out.X, out.Y, out.Z),
+		FIntVector(out),
 		dir
 	));
+	start = out;
 	return FIteratorReturn(out, voxels);
 }
