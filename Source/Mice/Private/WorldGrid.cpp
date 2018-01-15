@@ -34,7 +34,7 @@ void AWorldGrid::BeginPlay()
 
 }
 
-bool AWorldGrid::PlotPine(FVector s, FVector e)
+bool AWorldGrid::PlotLine(FVector s, FVector e)
 {
 	FVector start = s / 100.0f;
 	FVector end = e / 100.0f;
@@ -101,7 +101,7 @@ TMap<FIntVector, FIntVector> AWorldGrid::CalculatePaths(AUnit * Unit, int32 Limi
 
 	TArray<FIntVector> CloseSet = TArray<FIntVector>();
 
-	TMap<FIntVector, int32> gScore = TMap<FIntVector, int32>();
+	TMap<FIntVector, float> gScore = TMap<FIntVector, float>();
 	gScore.Add(Unit->pos, 0);
 	TMap<FIntVector, FIntVector> roots = TMap<FIntVector, FIntVector>();
 	while (OpenSet.Num() > 0)
@@ -109,9 +109,7 @@ TMap<FIntVector, FIntVector> AWorldGrid::CalculatePaths(AUnit * Unit, int32 Limi
 		FIntVector current = OpenSet[0];
 		OpenSet.RemoveAt(0);
 		CloseSet.Add(current);
-
 		TArray<FIntVector> neighbours = GetNeighbours(current);
-
 		for (FIntVector& neighbour : neighbours)
 		{
 			if (!CloseSet.Contains(neighbour)) 
@@ -120,11 +118,10 @@ TMap<FIntVector, FIntVector> AWorldGrid::CalculatePaths(AUnit * Unit, int32 Limi
 				{
 					OpenSet.Add(neighbour);
 				}
-				int32* y = gScore.Find(current);
+				float* y = gScore.Find(current);
 				if (y) {
-					int32 currentScore = *y + 1;
-
-					int32* x = gScore.Find(neighbour);
+					float currentScore = *y + FVector::Dist(FVector(current), FVector(neighbour));
+					float* x = gScore.Find(neighbour);
 
 					if (x)
 					{
@@ -251,7 +248,7 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 	RegisterAllComponents();
 }
 
-void AWorldGrid::DebugPath(TMap<FIntVector, int32> gScore)
+void AWorldGrid::DebugPath(TMap<FIntVector, float> gScore)
 {
 	for (TPair<FIntVector, FGridTile>& tile : gridTiles)
 	{
@@ -261,14 +258,14 @@ void AWorldGrid::DebugPath(TMap<FIntVector, int32> gScore)
 		}
 	}
 
-	for (TPair<FIntVector, int32>& elem : gScore)
+	for (TPair<FIntVector, float>& elem : gScore)
 	{
 		FGridTile* tile = gridTiles.Find(elem.Key);
 		if (tile)
 		{
 			if (tile->DebugTextRender)
 			{
-				tile->DebugTextRender->SetText(FText::FromString(FString::FromInt(elem.Value)));
+				tile->DebugTextRender->SetText(FText::FromString(FString::SanitizeFloat(elem.Value)));
 			}
 		}
 	}

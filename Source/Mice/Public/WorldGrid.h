@@ -109,7 +109,7 @@ protected:
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 
-	void DebugPath(TMap<FIntVector, int32> gScore);
+	void DebugPath(TMap<FIntVector, float> gScore);
 
 	TArray<FIntVector> GetNeighbours(FIntVector origin);
 
