@@ -44,7 +44,7 @@ public:
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType, Blueprintable)
 class MICE_API UVoxelLineTraceIterator : public UObject
 {
 	GENERATED_BODY()

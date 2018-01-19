@@ -31,6 +31,8 @@ struct FGridTransform
 		TArray<FIntVector> WalkablePosistions;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		TArray<FIntVector> BlockedTiles;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100"))
+		int blockPercentage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool isBorder;
 
@@ -41,11 +43,13 @@ public:
 		TArray<FIntVector> walkablePosistions = TArray<FIntVector>(),
 		EDirection direction = EDirection::D_Forward,
 		TArray<FIntVector> blockedTiles = TArray<FIntVector>(),
+		int bp = 100,
 		bool border = false) :
 			Origin(origin),
 			WalkablePosistions(walkablePosistions),
 			Direction(direction),
 			BlockedTiles(blockedTiles),
+			blockPercentage(bp),
 			isBorder(border){}
 };
 

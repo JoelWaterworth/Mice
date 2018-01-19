@@ -38,10 +38,12 @@ struct FGridTile
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool isWalkable;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 		UGridCollision* CollisionBox;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		UTextRenderComponent* DebugTextRender;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100"))
+		int blockPercentage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		AUnit* Unit;
 
@@ -50,11 +52,13 @@ public:
 	FGridTile(
 		bool w = false,
 		UGridCollision* col = nullptr,
+		int bp = 100,
 		UTextRenderComponent* text = nullptr,
 		AUnit* u = nullptr) : 
 			isWalkable(w),
 			CollisionBox(col),
 			DebugTextRender(text),
+			blockPercentage(bp),
 			Unit(u) {}
 };
 
@@ -145,4 +149,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 		static TArray<FIntVector> CreatePathFromRoutes(TMap<FIntVector, FIntVector> cameFrom, FIntVector Dest);
+
+	UFUNCTION(BlueprintCallable)
+	TMap<FIntVector, FObstucle> GetObstucles() const { return obstucles; }
 };
