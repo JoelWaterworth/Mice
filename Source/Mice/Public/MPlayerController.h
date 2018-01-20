@@ -41,14 +41,14 @@ protected:
 
 	AActor* Cursor;
 
-	//void Target();
-
-	//void Select();
-
 	virtual void BeginPlay() override;
 
 public:
 	// Called every frame
 
-	TArray<UMCommand*> GetCommands();
+	UFUNCTION(BlueprintCallable)
+	TArray<UMCommand*> GetCommands() const { return commands; }
+
+	UFUNCTION(BlueprintCallable)
+		void ClearCommands() { commands.Empty(); }
 };

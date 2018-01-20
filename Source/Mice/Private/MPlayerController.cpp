@@ -54,8 +54,3 @@ void AMPlayerController::BeginPlay()
 	bShowMouseCursor = true;
 	Super::BeginPlay();
 }
-
-TArray<UMCommand*> AMPlayerController::GetCommands()
-{
-	return commands;
-}

@@ -7,27 +7,24 @@
 #include "MPlayerController.h"
 #include "MCommand.h"
 #include "GameFramework/GameMode.h"
-#include "SimultaneousGameMode.generated.h"
+#include "MGameMode.generated.h"
 
 /**
  * 
  */
 
 UCLASS()
-class MICE_API ASimultaneousGameMode : public AGameMode
+class MICE_API AMGameMode : public AGameMode
 {
 	GENERATED_BODY()
 	
 	
 public:
-	ASimultaneousGameMode();
+	AMGameMode();
 
 	/** setup team changes at player login */
 	void PostLogin(APlayerController* NewPlayer) override;
 
-	UFUNCTION(BlueprintCallable)
-		void sumbitCommands(AMPlayerController* playerController);
-	
 protected:
 	virtual void BeginPlay() override;
 
@@ -35,12 +32,4 @@ protected:
 
 	/** select best spawn point for player */
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
-
-	void ExecuteCommands();
-	
-	TArray<UMCommand*> blueCommands;
-	TArray<UMCommand*> redCommands;
-
-	bool isBlueReady;
-	bool isRedReady;
 };

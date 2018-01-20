@@ -19,13 +19,12 @@ class MICE_API AMGameState : public AGameState
 public:
 	AMGameState();
 	
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 		void SumbitCommands(AMPlayerController* playerController);
 	
 protected:
-
-
-	void ExecuteCommands();
+	UFUNCTION(BlueprintCallable)
+		void ExecuteCommands(TArray<UMCommand*> commands);
 
 	UPROPERTY(Replicated)
 	TArray<UMCommand*> blueCommands;

@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "SimultaneousGameMode.h"
+#include "MGameMode.h"
 #include "GameFramework/GameStateBase.h"
 #include "PlayerCamera.h"
 #include "WorldGrid.h"
@@ -14,16 +14,13 @@
 #include "Kismet/GameplayStatics.h"
 
 
-ASimultaneousGameMode::ASimultaneousGameMode()
+AMGameMode::AMGameMode()
 {
 	DefaultPawnClass = APlayerCamera::StaticClass();
 	PlayerStateClass = AMPlayerState::StaticClass();
-
-	isBlueReady = false;
-	isRedReady = false;
 }
 
-void ASimultaneousGameMode::PostLogin(APlayerController * NewPlayer)
+void AMGameMode::PostLogin(APlayerController * NewPlayer)
 {
 	// Place player on a team before Super (VoIP team based init, findplayerstart, etc)
 	AMPlayerState* NewPlayerState = Cast<AMPlayerState>(NewPlayer->PlayerState);
@@ -32,31 +29,7 @@ void ASimultaneousGameMode::PostLogin(APlayerController * NewPlayer)
 	Super::PostLogin(NewPlayer);
 }
 
-void ASimultaneousGameMode::sumbitCommands(AMPlayerController * playerController)
-{
-	AMPlayerState* playerState = Cast<AMPlayerState>(playerController->PlayerState);
-
-	if (playerState->team == ETeam::T_Blue)
-	{
-		blueCommands = playerController->GetCommands();
-		isBlueReady = true;
-	}
-
-	if (playerState->team == ETeam::T_Red)
-	{
-		redCommands = playerController->GetCommands();
-		isRedReady = true;
-	}
-
-	ExecuteCommands();
-
-	if (isBlueReady && isRedReady)
-	{
-		ExecuteCommands();
-	}
-}
-
-void ASimultaneousGameMode::BeginPlay()
+void AMGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -95,7 +68,7 @@ void ASimultaneousGameMode::BeginPlay()
 	};
 }
 
-ETeam ASimultaneousGameMode::ChooseTeam(APlayerState * playerState)
+ETeam AMGameMode::ChooseTeam(APlayerState * playerState)
 {
 	int32 count = GameState->PlayerArray.Num();
 	if (count % 2) {
@@ -106,7 +79,7 @@ ETeam ASimultaneousGameMode::ChooseTeam(APlayerState * playerState)
 	}
 }
 
-AActor * ASimultaneousGameMode::ChoosePlayerStart_Implementation(AController * Player)
+AActor * AMGameMode::ChoosePlayerStart_Implementation(AController * Player)
 {
 	AMPlayerState* playerState = Cast<AMPlayerState>(Player->PlayerState);
 	ETeam playerTeam = playerState->team;
@@ -123,18 +96,4 @@ AActor * ASimultaneousGameMode::ChoosePlayerStart_Implementation(AController * P
 		}
 	}
 	return nullptr;
-}
-
-void ASimultaneousGameMode::ExecuteCommands()
-{
-	for (UMCommand* command : blueCommands)
-	{
-		command->Run();
-	}
-	for (UMCommand* command : redCommands)
-	{
-		command->Run();
-	}
-	blueCommands.Empty();
-	redCommands.Empty();
 }

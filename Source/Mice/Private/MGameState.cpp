@@ -3,6 +3,7 @@
 #include "MGameState.h"
 #include "UnrealNetwork.h"
 #include "EngineUtils.h"
+#include "Engine.h"
 #include "Unit.h"
 #include "MPlayerState.h"
 
@@ -21,7 +22,7 @@ void AMGameState::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLi
 	DOREPLIFETIME(AMGameState, isRedReady);
 }
 
-void AMGameState::SumbitCommands(AMPlayerController * playerController)
+void AMGameState::SumbitCommands_Implementation(AMPlayerController * playerController)
 {
 	if (playerController)
 	{
@@ -35,7 +36,6 @@ void AMGameState::SumbitCommands(AMPlayerController * playerController)
 			isBlueReady = true;
 			if (GEngine)
 				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("blue has submit calls"));
-			ExecuteCommands();
 		}
 
 		if (playerState->team == ETeam::T_Red)
@@ -44,12 +44,18 @@ void AMGameState::SumbitCommands(AMPlayerController * playerController)
 			isRedReady = true;
 			if (GEngine)
 				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("red has submit calls"));
-			ExecuteCommands();
 		}
 
 		if (isBlueReady && isRedReady)
 		{
-			ExecuteCommands();
+			ExecuteCommands(redCommands);
+			ExecuteCommands(blueCommands);
+			redCommands.Empty();
+			blueCommands.Empty();
+			isBlueReady = false;
+			isRedReady = false;
+			if (GEngine)
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("execute commands"));
 		}
 	}
 	else
@@ -59,28 +65,10 @@ void AMGameState::SumbitCommands(AMPlayerController * playerController)
 	}
 }
 
-void AMGameState::ExecuteCommands()
+void AMGameState::ExecuteCommands(TArray<UMCommand*> commands)
 {
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Execute Commands"));
-
-	if ((blueCommands.Num() == 0) && (redCommands.Num() == 0))
+	for (UMCommand* command : commands)
 	{
-		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("No Commands"));
-	}
-	for (UMCommand* command : blueCommands)
-	{
-		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Execute blue"));
 		command->Run();
 	}
-	for (UMCommand* command : redCommands)
-	{
-		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Execute blue"));
-		command->Run();
-	}
-	blueCommands.Empty();
-	redCommands.Empty();
 }
