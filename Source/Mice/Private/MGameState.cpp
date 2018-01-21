@@ -69,6 +69,14 @@ void AMGameState::ExecuteCommands(TArray<UMCommand*> commands)
 {
 	for (UMCommand* command : commands)
 	{
-		command->Run();
+		if (command)
+		{
+			command->Run();
+		}
+		else
+		{
+			if (GEngine)
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("invalid command"));
+		}
 	}
 }
