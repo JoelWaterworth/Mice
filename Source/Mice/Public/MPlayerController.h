@@ -28,7 +28,10 @@ public:
 		void ServerSubmitCommands();
 
 	UPROPERTY(Replicated, BlueprintReadWrite)
-		TArray<UMCommand*> commands;
+		TMap<AUnit*, UMCommand*> commands;
+
+	UPROPERTY(Replicated, BlueprintReadWrite)
+		TMap<AUnit*, UMCommand*> CommandMap;
 
 	UFUNCTION(Reliable, Client)
 		void ClientPlayerUpdate(ETeam team);
@@ -37,17 +40,13 @@ public:
 		void UpdatePlayerTeam(ETeam team);
 protected:
 
-	AUnit* Selected;
-
-	AActor* Cursor;
-
 	virtual void BeginPlay() override;
 
 public:
 	// Called every frame
 
 	UFUNCTION(BlueprintCallable)
-	TArray<UMCommand*> GetCommands() const { return commands; }
+		TMap<AUnit*, UMCommand*> GetCommands() { return commands; }
 
 	UFUNCTION(BlueprintCallable)
 		void ClearCommands() { commands.Empty(); }

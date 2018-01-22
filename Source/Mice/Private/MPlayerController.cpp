@@ -18,6 +18,7 @@ void AMPlayerController::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > 
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AMPlayerController, commands);
+	//DOREPLIFETIME(AMPlayerController, CommandMap);
 }
 
 bool AMPlayerController::ServerSubmitCommands_Validate()

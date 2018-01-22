@@ -91,5 +91,6 @@ public:
 		FGridTransform GridOrigin;
 	
 	//if it has no children this will be empty
-	FGridObjectTree GetObjectTree();
+	UFUNCTION(BlueprintCallable)
+		FGridObjectTree GetObjectTree();
 };

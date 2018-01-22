@@ -65,13 +65,13 @@ void AMGameState::SumbitCommands_Implementation(AMPlayerController * playerContr
 	}
 }
 
-void AMGameState::ExecuteCommands(TArray<UMCommand*> commands)
+void AMGameState::ExecuteCommands(TMap<AUnit*, UMCommand*> commands)
 {
-	for (UMCommand* command : commands)
+	for (auto& command : commands)
 	{
-		if (command)
+		if (command.Value)
 		{
-			command->Run();
+			command.Value->Run(command.Key);
 		}
 		else
 		{

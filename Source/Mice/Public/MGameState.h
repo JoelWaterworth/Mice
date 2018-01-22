@@ -24,12 +24,12 @@ public:
 	
 protected:
 	UFUNCTION(BlueprintCallable)
-		void ExecuteCommands(TArray<UMCommand*> commands);
+		void ExecuteCommands(TMap<AUnit*, UMCommand*> commands);
 
 	UPROPERTY(Replicated)
-	TArray<UMCommand*> blueCommands;
+		TMap<AUnit*, UMCommand*> blueCommands;
 	UPROPERTY(Replicated)
-	TArray<UMCommand*> redCommands;
+		TMap<AUnit*, UMCommand*> redCommands;
 
 	UPROPERTY(EditAnywhere, Replicated)
 	bool isBlueReady;

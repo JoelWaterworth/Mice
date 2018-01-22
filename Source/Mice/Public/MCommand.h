@@ -18,5 +18,5 @@ class MICE_API UMCommand : public UObject
 	
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void Run();
+	void Run(AUnit* target);
 };
