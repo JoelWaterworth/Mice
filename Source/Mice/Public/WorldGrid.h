@@ -28,30 +28,35 @@ public:
 		blockPercentage(bp){}
 };
 
-
+USTRUCT(BlueprintType)
 struct FBoarderKey {
 
-	FIntVector inner;
-	FIntVector outer;
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		EDirection Direction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FIntVector origin;
 
 public:
 
 	FBoarderKey(
-		FIntVector i = FIntVector(),
+		EDirection d = EDirection::D_Forward,
 		FIntVector o = FIntVector()) :
-		inner(i),
-		outer(o) {}
+		Direction(d),
+		origin(o) {}
 
 	bool operator==(const FBoarderKey& other) const
 	{
-		return inner == other.inner && outer == other.outer;
+		return Direction == other.Direction && origin == other.origin;
+	}
+
+	FORCEINLINE friend uint32 GetTypeHash(const FBoarderKey& Key)
+	{
+
+		return FCrc::MemCrc_DEPRECATED(&Key, sizeof(FBoarderKey));
 	}
 };
-
-FORCEINLINE uint32 GetTypeHash(const FBoarderKey& Key)
-{
-	return FCrc::MemCrc_DEPRECATED(&Key, sizeof(FBoarderKey));
-}
 
 USTRUCT(BlueprintType)
 struct FGridTile
@@ -134,7 +139,7 @@ protected:
 	UPROPERTY()
 		TMap<FIntVector, FObstucle> obstucles;
 
-	
+	UPROPERTY()
 		TMap<FBoarderKey, FObstucle> WallObstucles;
 
 	UPROPERTY()
@@ -170,6 +175,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 		TMap<FIntVector, FObstucle> GetObstucles() const { return obstucles; }
 
-	//UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable)
 		TMap<FBoarderKey, FObstucle> GetWallObstucles() const { return WallObstucles; }
 };

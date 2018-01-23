@@ -216,22 +216,30 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 		for (FIntVector& pos : object->GridOrigin.BlockedTiles) {
 			FIntVector loc = pos + object->GridOrigin.Origin;
 			if (object->GridOrigin.isBorder) {
-				auto boarder = [](FIntVector loc, FIntVector outer_offset, FIntVector righthand,TMap<FBoarderKey, FObstucle>& WallObstucles, AGridObject* object) {
-					WallObstucles.Add(FBoarderKey(loc, loc + outer_offset),
+				auto boarder = [](FIntVector loc, EDirection dir, EDirection righthand,TMap<FBoarderKey, FObstucle>& WallObstucles, AGridObject* object) {
+					WallObstucles.Add(FBoarderKey(dir, loc),
 						FObstucle(object->GridOrigin.blockPercentage));
 					if (object->GridOrigin.isRightHandCorner) {
-						WallObstucles.Add(FBoarderKey(loc, loc + FIntVector(1, 0, 0)),
+						WallObstucles.Add(FBoarderKey(righthand, loc),
 							FObstucle(object->GridOrigin.blockPercentage));
 					};
 				};
 				switch (object->GridOrigin.Direction) {
 					case EDirection::D_Forward :
-						boarder(loc, FIntVector(0, 1, 0), FIntVector(1, 0, 0), WallObstucles, object);
+						boarder(loc, EDirection::D_Forward, EDirection::D_Rightward, WallObstucles, object);
 						break;
 					case EDirection::D_Rightward:
-						boarder(loc, FIntVector(1, 0, 0), FIntVector(0, -1, 0), WallObstucles, object);
+						boarder(loc, EDirection::D_Rightward, EDirection::D_Backward, WallObstucles, object);
+						break;
+					case EDirection::D_Backward:
+						boarder(loc, EDirection::D_Backward, EDirection::D_Leftward, WallObstucles, object);
+						break;
+					case EDirection::D_Leftward:
+						boarder(loc, EDirection::D_Leftward, EDirection::D_Forward, WallObstucles, object);
 						break;
 				default:
+					WallObstucles.Add(FBoarderKey(object->GridOrigin.Direction, loc),
+						FObstucle(object->GridOrigin.blockPercentage));
 					break;
 				}
 			}
