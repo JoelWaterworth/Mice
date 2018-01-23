@@ -212,6 +212,15 @@ private:
 	 */
 	bool UpdateMaterialSamplers(UMaterial* Material, const FString& MapName, const FString& SourceImagePath) const;
 
+	/*
+	 * Replaces a material that is currently on a mesh with a new one
+	 * @param Mesh the mesh that the current material belongs to
+	 * @param Material a pointer to the specific material to recreate
+	 * @param MaterialSlotName the name set to the material slot on the mesh, used if there is no current material name to use
+	 * @returns a pointer to the new material
+	*/
+	UMaterial* ReplaceMaterial(const UObject* Mesh, const UMaterial* Material, const FString& MaterialSlotName) const;
+
 private:
 	/** Internal Web Socket Object */
 	TUniquePtr<FSubstanceLiveLinkWebSocket>		WebSocket;
@@ -232,11 +241,17 @@ private:
 	FCriticalSection							GameThreadMessagesCS;
 
 	/** Stores a list of messages to be executed on the Main Thread */
-	TArray<TFunction<void ()> >					GameThreadMessages;
+	TArray<TFunction<void ()>>					GameThreadMessages;
 
 	/** Stores a list of changed materials that we should update */
 	TSet<UMaterial*>							ChangedMaterials;
 
 	/** If true, we should force editor viewport refresh */
 	bool										bRefreshEditorViewport;
+
+	/** Timer for checking when a ping message should be sent to Painter*/
+	float										fPingTimer;
+
+	/** Interval for ping message to be sent to painter in seconds */
+	static const float							kDisconnectCheckTimer;
 };

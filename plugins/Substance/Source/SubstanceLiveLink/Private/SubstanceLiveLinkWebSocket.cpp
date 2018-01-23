@@ -92,6 +92,16 @@ void FSubstanceLiveLinkWebSocket::SendMessage(const ANSICHAR* Message)
 	OutgoingMessages.Add(MoveTemp(Frame));
 }
 
+void FSubstanceLiveLinkWebSocket::Ping()
+{
+	FWebSocketFrame Frame;
+	Frame.OpCode = EWebSocketOpCode::Ping;
+	Frame.FinalFragment = true;
+	Frame.UseMask = false;
+
+	OutgoingMessages.Add(MoveTemp(Frame));
+}
+
 void FSubstanceLiveLinkWebSocket::Tick()
 {
 	if (Socket == nullptr)
@@ -205,6 +215,11 @@ void FSubstanceLiveLinkWebSocket::Tick()
 					case EWebSocketOpCode::Close:
 						{
 							Disconnect();
+						}
+						break;
+					case EWebSocketOpCode::Pong:
+						{
+
 						}
 						break;
 					default:

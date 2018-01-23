@@ -155,6 +155,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void GetSpawnPoints();
+
 	//The Transform is of the centre of the tile
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 		FTransform VectorToWorldTransform(FIntVector pos);

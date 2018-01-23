@@ -40,11 +40,12 @@ struct ReimportData
 	UMaterial* OwnedMaterialReferencee;
 	TMap<uint32, USubstanceImageInput*> ImageSources;
 	TArray<MaterialParameterSet> ReferencingMaterials;
+	TArray<MaterialInstanceParameterSet> ReferencingMaterialInstances;
 	TArray<uint32> EnabledOutputUIDs;
 	SubstanceAir::shared_ptr<SubstanceAir::Preset> PreviousPresetData;
 
 	ReimportData(const FString& packageURL, UMaterial* owningMaterial, SubstanceAir::shared_ptr<SubstanceAir::Preset> preset,
-	             TArray<MaterialParameterSet>& referencingMaterials, TMap<uint32, USubstanceImageInput*>& imageSources, TArray<uint32>& enabledOutputUIDs)
+	             TArray<MaterialParameterSet>& referencingMaterials, TArray<MaterialInstanceParameterSet>& referencingMaterialInstances, TMap<uint32, USubstanceImageInput*>& imageSources, TArray<uint32>& enabledOutputUIDs)
 	{
 		PackageURL = packageURL;
 		ImageSources = imageSources;
@@ -52,6 +53,7 @@ struct ReimportData
 		EnabledOutputUIDs = enabledOutputUIDs;
 		ReferencingMaterials = referencingMaterials;
 		OwnedMaterialReferencee = owningMaterial;
+		ReferencingMaterialInstances = referencingMaterialInstances;
 	}
 };
 
@@ -448,6 +450,8 @@ void USubstanceFactory::RecreateGraphsPostReimport(USubstanceInstanceFactory* Pa
 		//Check if material is valid if so, set it up with the new outputs
 		Substance::Helpers::ResetMaterialTexturesFromGraph(NewInstance, GrItr.OwnedMaterialReferencee, GrItr.ReferencingMaterials);
 
+		//Reset any references to substance textures in material instances
+		Substance::Helpers::ResetMaterialInstanceTexturesFromGraph(NewInstance, GrItr.ReferencingMaterialInstances);
 	}
 
 	FContentBrowserModule& ContentBrowserModule = FModuleManager::Get().LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
@@ -619,14 +623,32 @@ void UReimportSubstanceFactory::SaveRecreationData(USubstanceInstanceFactory* Fa
 					{
 						CurrentMaterialSet.Material = *MatItr;
 						CurrentMaterialSet.ParameterNames.Add(SubstanceTexture->OutputCopy->mDesc.mIdentifier.c_str(), Expression);
+
+						//Add all referencing material expressions to the update list
+						ReferencingMaterials.Add(CurrentMaterialSet);
 					}
 				}
 			}
+		}
 
-			//If the material has used params, add it to the update list
-			if (CurrentMaterialSet.Material)
+		TArray<MaterialInstanceParameterSet> ReferencingMaterialInstances;
+		for (TObjectIterator<UMaterialInstance> MatItr; MatItr; ++MatItr)
+		{
+			MaterialInstanceParameterSet CurrentMaterialInstanceSet;
+			for (int32 ParameterIndex = 0; ParameterIndex < MatItr->TextureParameterValues.Num(); ++ParameterIndex)
 			{
-				ReferencingMaterials.AddUnique(CurrentMaterialSet);
+				if (MatItr->TextureParameterValues[ParameterIndex].ParameterValue)
+				{
+					USubstanceTexture2D* SubstanceTexture = Cast<USubstanceTexture2D>(MatItr->TextureParameterValues[ParameterIndex].ParameterValue);
+					if (SubstanceTexture && SubstanceTexture->OutputCopy && SubstanceTexture->ParentInstance && SubstanceTexture->ParentInstance->Instance &&
+					        SubstanceTexture->ParentInstance->Instance->mInstanceUid == GraphItr->Instance->mInstanceUid)
+					{
+						CurrentMaterialInstanceSet.MaterialInstance = *MatItr;
+						CurrentMaterialInstanceSet.ParameterNames.Add(SubstanceTexture->OutputCopy->mDesc.mIdentifier.c_str(), MatItr->TextureParameterValues[ParameterIndex].ParameterName);
+
+						ReferencingMaterialInstances.Add(CurrentMaterialInstanceSet);
+					}
+				}
 			}
 		}
 
@@ -650,7 +672,7 @@ void UReimportSubstanceFactory::SaveRecreationData(USubstanceInstanceFactory* Fa
 		Substance::Helpers::CopyPresetData(CurrentInstance, *StorePreset.get());
 
 		//Set all of the reference data needed for this graph
-		ReimportData CurrentReimportData = ReimportData(GraphItr->PackageURL, GraphItr->CreatedMaterial, StorePreset, ReferencingMaterials, GraphItr->ImageSources, EnabledOutputs);
+		ReimportData CurrentReimportData = ReimportData(GraphItr->PackageURL, GraphItr->CreatedMaterial, StorePreset, ReferencingMaterials, ReferencingMaterialInstances, GraphItr->ImageSources, EnabledOutputs);
 		PreviousInstanceTransfer.Add(CurrentReimportData);
 	}
 }

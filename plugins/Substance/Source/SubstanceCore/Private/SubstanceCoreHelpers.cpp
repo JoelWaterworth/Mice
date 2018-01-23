@@ -1906,7 +1906,7 @@ void ClearFromRender(USubstanceGraphInstance* Graph)
 	CurrentRenderSet.Remove(Graph->Instance);
 
 	//Wait for the renderer to finish its current update.
-	if (GSubstanceRenderer.IsValid() && CurrentRenderSet.Num())
+	if (GSubstanceRenderer.IsValid())
 	{
 		GSubstanceRenderer->cancelAll();
 	}
@@ -2754,6 +2754,31 @@ void ResetMaterialTexturesFromGraph(USubstanceGraphInstance* Graph, UMaterial* O
 	//Reset the material created when the graph was created
 	Graph->CreatedMaterial = OwnedMaterial;
 
+#endif //WITH_EDITOR
+}
+
+//Used to reset material instance parameter references to substance outputs post reimport
+void ResetMaterialInstanceTexturesFromGraph(USubstanceGraphInstance* Graph, const TArray<MaterialInstanceParameterSet>& Materials)
+{
+#if WITH_EDITOR
+	for (const auto& MatItr : Materials)
+	{
+		for (const auto& OutItr : Graph->Instance->getOutputs())
+		{
+			if (MatItr.ParameterNames.Contains(OutItr->mDesc.mIdentifier.c_str()) && OutItr->mUserData)
+			{
+				UTexture* Texture = reinterpret_cast<OutputInstanceData*>(OutItr->mUserData)->Texture.Get();
+
+				for (int32 ParameterIndex = 0; ParameterIndex < MatItr.MaterialInstance->TextureParameterValues.Num(); ++ParameterIndex)
+				{
+					if (MatItr.MaterialInstance->TextureParameterValues[ParameterIndex].ParameterName == MatItr.ParameterNames[OutItr->mDesc.mIdentifier.c_str()])
+					{
+						MatItr.MaterialInstance->TextureParameterValues[ParameterIndex].ParameterValue = Texture;
+					}
+				}
+			}
+		}
+	}
 #endif //WITH_EDITOR
 }
 

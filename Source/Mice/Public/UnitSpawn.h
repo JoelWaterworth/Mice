@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Unit.h"
 #include "GameFramework/Actor.h"
 #include "UnitSpawn.generated.h"
 
@@ -16,7 +17,10 @@ public:
 	AUnitSpawn();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FIntVector origin;
+		FIntVector origin;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		ETeam team;
 protected:
 	virtual void PostEditMove(bool bFinished) override;
 };

@@ -32,6 +32,7 @@ void AUnitSpawn::PostEditMove(bool bFinished)
 
 			RootComponent->SetWorldLocation(worldGrid->VectorToWorldTransform(offset).GetLocation());
 			origin = offset;
+			worldGrid->GetSpawnPoints();
 		}
 	}
 

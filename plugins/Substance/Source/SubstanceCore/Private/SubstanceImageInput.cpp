@@ -191,7 +191,7 @@ void USubstanceImageInput::BeginDestroy()
 	//Set the input of the consumer using this object to clear user data
 	for (const auto& ConsumerItr : Consumers)
 	{
-		if (!ConsumerItr->Instance)
+		if (!ConsumerItr || !ConsumerItr->Instance)
 			continue;
 
 		for (const auto& InputItr : ConsumerItr->Instance->getInputs())

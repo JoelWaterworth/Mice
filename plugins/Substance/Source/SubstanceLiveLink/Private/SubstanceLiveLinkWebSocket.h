@@ -54,6 +54,11 @@ public:
 	void SendMessage(const ANSICHAR* Message);
 
 	/**
+	 * Send a ping message to the receiver to verify the connection	
+	*/
+	void Ping();
+	
+	/**
 	 * Update the message pumps and dispatch any received messages
 	 */
 	void Tick();

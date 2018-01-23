@@ -18,6 +18,13 @@
 #include "Materials/MaterialExpressionVectorParameter.h"
 #include "Misc/SecureHash.h"
 #include "SoftObjectPath.h"
+#include "AssetToolsModule.h"
+#include "ObjectTools.h"
+#include "ContentBrowserModule.h"
+#include "IContentBrowserSingleton.h"
+#include "MessageDialog.h"
+
+const float FSubstanceLiveLinkConnection::kDisconnectCheckTimer = 10.0f;
 
 /**
  */
@@ -35,6 +42,8 @@ FSubstanceLiveLinkConnection::FSubstanceLiveLinkConnection()
 
 	// Initiate Connection
 	ConnectToSubstancePainter();
+
+	fPingTimer = 0;
 }
 
 FSubstanceLiveLinkConnection::~FSubstanceLiveLinkConnection()
@@ -124,6 +133,15 @@ bool FSubstanceLiveLinkConnection::GameThreadTick(float DeltaTime)
 {
 	if (WebSocket.IsValid())
 	{
+		fPingTimer += DeltaTime;
+		if (fPingTimer >= kDisconnectCheckTimer)
+		{
+			//Send a ping message using the websocket to force check if it is still valid
+			//Needed to invalidate the websocket if painter has crashed or closed without a close message
+			WebSocket->Ping();
+			fPingTimer = 0.0f;
+		}
+
 		WebSocket->Tick();
 
 		switch (WebSocket->GetConnectionStatus())
@@ -179,17 +197,57 @@ TSharedPtr<FJsonObject> FSubstanceLiveLinkConnection::GeneratePainterProjectJson
 	FString WorkspacePath = FPaths::ConvertRelativePathToFull(FPaths::ProjectDir());
 	FString MeshPath;
 
-	if (!GetSourceFile(Mesh, MeshPath))
-	{
-		return nullptr;
-	}
+	//Create a string to represent the location of the fbx to send to painter
+	FString MeshName = Mesh->GetName();
+	FString ExportPath = FPaths::Combine((L"SP_Textures"), MeshName);
 
-	FString ExportPath = FPaths::Combine(TEXT("SP_Textures"), *FPaths::GetBaseFilename(MeshPath));
-	FString MeshURI = GeneratePathURI(MeshPath);
+	bool bSourceExists = FPaths::FileExists(MeshPath);
+
+	FString MeshURI;
+
+	FString FileOutputPath = FPaths::Combine(WorkspacePath, ExportPath);
+
+	TArray<UObject*> objArray;
+	objArray.Add(Mesh);
+
+	//check if object file exists in the project content, if not export the uobject to a .fbx file
+	if (!bSourceExists)
+	{
+		//Create a full output path
+		FString ExportedPath = FileOutputPath;
+
+		FString MeshContentName;
+		Mesh->GetOuter()->GetName(MeshContentName);
+
+		MeshContentName.RemoveFromStart(FString("/"));
+		ExportedPath.Append("/");
+		ExportedPath.Append(MeshContentName);
+		ExportedPath.Append(".fbx");
+
+		if (!FPaths::FileExists(ExportedPath))
+		{
+			FText tex = FText::FromString(FString("No valid FBX found for this object, one must be exported. Please disable the \"Collision\" static mesh option in the export dialog folowing this one."));
+			//Export currently pops up a dialog to make sure the user has the correct settings
+			if (FMessageDialog::Open(EAppMsgType::OkCancel, tex) == EAppReturnType::Ok)
+				FAssetToolsModule::GetModule().Get().ExportAssets(objArray, FileOutputPath);
+			else
+				return nullptr;
+		}
+
+		MeshURI = GeneratePathURI(ExportedPath);
+	}
+	else
+	{
+		MeshURI = GeneratePathURI(MeshPath);
+	}
 
 	//create JSON references for material link
 	TSharedRef<FJsonObject> MaterialsLink = MakeShared<FJsonObject>();
 	TArray<UMaterial*> Materials = GetMeshMaterials(Mesh);
+
+	FContentBrowserModule& ContentBrowserModule = FModuleManager::Get().LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
+	ContentBrowserModule.Get().SyncBrowserToAssets(objArray);
+
 	for (const auto& Material : Materials)
 	{
 		TSharedRef<FJsonObject> MaterialLink = MakeShared<FJsonObject>();
@@ -276,7 +334,7 @@ FString FSubstanceLiveLinkConnection::GeneratePathURI(const FString& Path) const
 FString FSubstanceLiveLinkConnection::GetJsonAsString(TSharedRef<FJsonObject> Json) const
 {
 	FString JsonString;
-	auto writer = TJsonWriterFactory<TCHAR, TCondensedJsonPrintPolicy<TCHAR> >::Create(&JsonString);
+	auto writer = TJsonWriterFactory<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>::Create(&JsonString);
 	FJsonSerializer::Serialize(Json, writer);
 	writer->Close();
 	return JsonString;
@@ -288,22 +346,40 @@ TArray<UMaterial*> FSubstanceLiveLinkConnection::GetMeshMaterials(UObject* Mesh)
 
 	if (UStaticMesh* StaticMesh = Cast<UStaticMesh>(Mesh))
 	{
-		for (const auto& StaticMaterial : StaticMesh->StaticMaterials)
+		for (auto& StaticMaterial : StaticMesh->StaticMaterials)
 		{
-			if (UMaterial* Material = Cast<UMaterial>(StaticMaterial.MaterialInterface))
+			UMaterial* Material = Cast<UMaterial>(StaticMaterial.MaterialInterface);
+
+			if (Material == nullptr)
 			{
-				Materials.Add(Material);
+				UMaterial* UnrealMaterial = ReplaceMaterial(Mesh, Material, StaticMaterial.MaterialSlotName.ToString());
+				if (UnrealMaterial == nullptr)
+					continue;
+
+				StaticMaterial.MaterialInterface = UnrealMaterial;
+
+				Material = UnrealMaterial;
 			}
+			Materials.Add(Material);
 		}
 	}
 	else if (USkeletalMesh* SkelMesh = Cast<USkeletalMesh>(Mesh))
 	{
-		for (const auto& SkelMaterial : SkelMesh->Materials)
+		for (auto& SkelMaterial : SkelMesh->Materials)
 		{
-			if (UMaterial* Material = Cast<UMaterial>(SkelMaterial.MaterialInterface))
+			UMaterial* Material = Cast<UMaterial>(SkelMaterial.MaterialInterface);
+
+			if (Material == nullptr)
 			{
-				Materials.Add(Material);
+				UMaterial* UnrealMaterial = ReplaceMaterial(Mesh, Material, SkelMaterial.MaterialSlotName.ToString());
+				if (UnrealMaterial == nullptr)
+					continue;
+
+				SkelMaterial.MaterialInterface = UnrealMaterial;
+
+				Material = UnrealMaterial;
 			}
+			Materials.Add(Material);
 		}
 	}
 
@@ -316,8 +392,11 @@ bool FSubstanceLiveLinkConnection::GetSourceFile(UObject* Obj, FString& OutFilen
 
 	if (FReimportManager::Instance()->CanReimport(Obj, &Filenames))
 	{
+
 		if (Filenames.Num() == 1)
 		{
+			if (Filenames[0].IsEmpty())
+				return false;
 			OutFilename = MoveTemp(Filenames[0]);
 			return true;
 		}
@@ -379,6 +458,72 @@ void FSubstanceLiveLinkConnection::RegisterMessageHandlers()
 			return;
 		}
 
+		//Check current material for all texture nodes needed by the current painter project to see if it has already been initialized
+		bool bFoundAll = true;
+		for (const auto& KeyValue : ParamsJson->Values)
+		{
+			bool bFoundExpression = false;
+			if (UMaterial* Material = Cast<UMaterial>(FSoftObjectPath(MaterialName).TryLoad()))
+			{
+				for (const auto& MaterialExpression : Material->Expressions)
+				{
+					UMaterialExpressionTextureSampleParameter2D* Expression = Cast<UMaterialExpressionTextureSampleParameter2D>(MaterialExpression);
+
+					if (Expression == nullptr || Expression->Texture == nullptr)
+					{
+						continue;
+					}
+					else if (Expression->Texture->GetName() == FPaths::GetBaseFilename(KeyValue.Value->AsString()))
+					{
+						bFoundExpression = true;
+						break;
+					}
+				}
+			}
+			if (!bFoundExpression)
+			{
+				bFoundAll = false;
+			}
+		}
+
+		//If there are any missing nodes recreate the material
+		if (!bFoundAll)
+		{
+			UMaterial* Material = Cast<UMaterial>(FSoftObjectPath(MaterialName).TryLoad());
+
+			if (Material)
+			{
+				if (Material->Expressions.Num() > 0)
+				{
+					FString MaterialNameTemp;
+					Material->GetName(MaterialNameTemp);
+
+					FString OuterName;
+					OuterName = Material->GetOuter()->GetName();
+
+					FString Left;
+					FString Right;
+					//Create an unreal material asset
+					UMaterialFactoryNew* MaterialFactory = NewObject<UMaterialFactoryNew>();
+
+					OuterName.Split(TEXT("/"), &Left, &Right, ESearchCase::IgnoreCase, ESearchDir::FromEnd);
+					FString PkgName = Left + TEXT("/") + MaterialNameTemp;
+					UPackage* Pkg = CreatePackage(nullptr, *PkgName);
+					Pkg->FullyLoad();
+					UMaterial* NewMaterial = (UMaterial*)MaterialFactory->FactoryCreateNew(
+					                             UMaterial::StaticClass(),
+					                             Pkg,
+					                             *MaterialNameTemp,
+					                             RF_Standalone | RF_Public, nullptr, GWarn);
+
+					NewMaterial->PreEditChange(nullptr);
+					NewMaterial->PostEditChange();
+
+					Material = NewMaterial;
+				}
+			}
+		}
+
 		for (const auto& KeyValue : ParamsJson->Values)
 		{
 			FString MapName = KeyValue.Key;
@@ -388,9 +533,9 @@ void FSubstanceLiveLinkConnection::RegisterMessageHandlers()
 
 			//sometimes painter sends us maps that don't actually change,
 			//so we should verify that here in a worker thread
-			auto HashTask = new FAutoDeleteAsyncTask<FSubstanceLiveLinkAutoDeleteAsyncTask>([Self, TextureLoader, this, MaterialName, MapName, SourceImagePath]()
+			auto HashTask = new FAutoDeleteAsyncTask<FSubstanceLiveLinkAutoDeleteAsyncTask>([Self, TextureLoader, this, MaterialName, MapName, SourceImagePath, bFoundAll]()
 			{
-				if (!TextureLoader->HasFileChanged(SourceImagePath))
+				if (!TextureLoader->HasFileChanged(SourceImagePath) && bFoundAll)
 				{
 					return;
 				}
@@ -665,4 +810,44 @@ void FSubstanceLiveLinkConnection::QueueGameThreadMessage(TFunction<void ()> Mes
 {
 	FScopeLock Lock(&GameThreadMessagesCS);
 	GameThreadMessages.Add(Message);
+}
+
+UMaterial* FSubstanceLiveLinkConnection::ReplaceMaterial(const UObject* Mesh, const UMaterial* Material, const FString& MaterialSlotName) const
+{
+	FString MaterialName;
+	if (Material)
+		Material->GetName(MaterialName);
+	else
+		MaterialName = MaterialSlotName;
+
+	if (MaterialName == "None")
+	{
+		return nullptr;
+	}
+
+	FString OuterName;
+	if (Material)
+		OuterName = Material->GetOuter()->GetName();
+	else
+		OuterName = Mesh->GetOuter()->GetName();
+
+	FString Left;
+	FString Right;
+	//Create an unreal material asset
+	UMaterialFactoryNew* MaterialFactory = NewObject<UMaterialFactoryNew>();
+
+	OuterName.Split(TEXT("/"), &Left, &Right, ESearchCase::IgnoreCase, ESearchDir::FromEnd);
+	FString PkgName = Left + TEXT("/") + MaterialName;
+	UPackage* Pkg = CreatePackage(nullptr, *PkgName);
+	Pkg->FullyLoad();
+	UMaterial* NewMaterial = (UMaterial*)MaterialFactory->FactoryCreateNew(
+	                             UMaterial::StaticClass(),
+	                             Pkg,
+	                             *MaterialName,
+	                             RF_Standalone | RF_Public, nullptr, GWarn);
+
+	NewMaterial->PreEditChange(nullptr);
+	NewMaterial->PostEditChange();
+
+	return NewMaterial;
 }

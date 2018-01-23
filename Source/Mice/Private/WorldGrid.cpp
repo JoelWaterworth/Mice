@@ -4,6 +4,7 @@
 #include "Algo/Reverse.h"
 #include "MGameInstance.h"
 #include "EngineUtils.h"
+#include "UnitSpawn.h"
 #include "VoxelLineTraceIterator.h"
 #include "../Public/WorldGrid.h"
 
@@ -14,7 +15,7 @@ DEFINE_LOG_CATEGORY(LogWorld);
 AWorldGrid::AWorldGrid()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	InstanceMesh = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("InstanceMesh"));
@@ -92,6 +93,26 @@ FIntVector AWorldGrid::LocationToVector(FVector currentPos)
 	pos.Y = (int32)FMath::RoundHalfToZero(RelativePos.Y / spacing);
 	pos.Z = (int32)FMath::RoundHalfToZero(RelativePos.Z / spacing);
 	return pos;
+}
+
+void AWorldGrid::GetSpawnPoints() {
+	BlueSpawnPoints.Empty();
+	RedSpawnPoints.Empty();
+	for (TActorIterator<AUnitSpawn> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		AUnitSpawn* object = *ActorItr;
+		switch (object->team)
+		{
+		case ETeam::T_Blue:
+			BlueSpawnPoints.Add(object->origin);
+			break;
+		case ETeam::T_Red:
+			RedSpawnPoints.Add(object->origin);
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 TMap<FIntVector, FIntVector> AWorldGrid::CalculatePaths(AUnit * Unit, int32 Limit)

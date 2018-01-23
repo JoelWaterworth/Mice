@@ -32,6 +32,23 @@ struct MaterialParameterSet
 	}
 };
 
+struct MaterialInstanceParameterSet
+{
+	UMaterialInstance* MaterialInstance;
+	TMap<FString, FName> ParameterNames;
+
+	//Default constructor and destructor
+	MaterialInstanceParameterSet() : MaterialInstance(nullptr) { }
+	~MaterialInstanceParameterSet() { }
+
+	//Comparison operator for adding unique elements to a TArray
+	bool operator==(const MaterialInstanceParameterSet& rhs) const
+	{
+		bool IsEqual = (this->MaterialInstance == rhs.MaterialInstance && rhs.ParameterNames.Num() == this->ParameterNames.Num());
+		return IsEqual;
+	}
+};
+
 //Framework forward declarations
 namespace SubstanceAir
 {
@@ -208,6 +225,9 @@ SUBSTANCECORE_API TWeakObjectPtr<UMaterial> CreateMaterial(USubstanceGraphInstan
 
 /** Sets all of the material inputs to the proper outputs from a graph instance */
 SUBSTANCECORE_API void ResetMaterialTexturesFromGraph(USubstanceGraphInstance* Graph, UMaterial* OwnedMaterial, const TArray<MaterialParameterSet>& Materials);
+
+/** Sets all of the material instance parameters to the proper outputs from a graph instance */
+SUBSTANCECORE_API void ResetMaterialInstanceTexturesFromGraph(USubstanceGraphInstance* Graph, const TArray<MaterialInstanceParameterSet>& Materials);
 
 /** Reset an instance's inputs to their default values -- Does not trigger rendering of the instance */
 SUBSTANCECORE_API void ResetToDefault(SubstanceAir::GraphInstance*);

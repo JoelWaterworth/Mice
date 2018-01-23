@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 53,
-	"VersionName": "4.18.0.26",
+	"Version": 54,
+	"VersionName": "4.18.0.27",
 	"FriendlyName": "Substance",
 	"Description": "Adds support for Substance (sbsar) textures",
 	"Category": "Editor",
