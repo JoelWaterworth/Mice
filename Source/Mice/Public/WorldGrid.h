@@ -8,6 +8,7 @@
 #include "GridObject.h"
 #include "Runtime/Engine/Classes/Components/TextRenderComponent.h"
 #include "Runtime/Engine/Classes/Components/InstancedStaticMeshComponent.h"
+#include "Misc/Crc.h"
 #include "GameFramework/Actor.h"
 #include "WorldGrid.generated.h"
 
@@ -17,19 +18,40 @@ USTRUCT(BlueprintType)
 struct FObstucle {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		TArray<EDirection> direction;//because mutlple walls can occupy the same wall tile this must be an array.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		bool isboarder;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100"))
+		int blockPercentage;
 
 public:
 
 	FObstucle(
-		bool b = false,
-		TArray<EDirection> d = TArray<EDirection>()) :
-		direction(d),
-		isboarder(b) {}
+		int bp = 100):
+		blockPercentage(bp){}
 };
+
+
+struct FBoarderKey {
+
+	FIntVector inner;
+	FIntVector outer;
+
+public:
+
+	FBoarderKey(
+		FIntVector i = FIntVector(),
+		FIntVector o = FIntVector()) :
+		inner(i),
+		outer(o) {}
+
+	bool operator==(const FBoarderKey& other) const
+	{
+		return inner == other.inner && outer == other.outer;
+	}
+};
+
+FORCEINLINE uint32 GetTypeHash(const FBoarderKey& Key)
+{
+	return FCrc::MemCrc_DEPRECATED(&Key, sizeof(FBoarderKey));
+}
 
 USTRUCT(BlueprintType)
 struct FGridTile
@@ -42,24 +64,16 @@ struct FGridTile
 		UGridCollision* CollisionBox;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		UTextRenderComponent* DebugTextRender;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100"))
-		int blockPercentage;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		AUnit* Unit;
 
 public:
 
 	FGridTile(
 		bool w = false,
 		UGridCollision* col = nullptr,
-		int bp = 100,
-		UTextRenderComponent* text = nullptr,
-		AUnit* u = nullptr) : 
+		UTextRenderComponent* text = nullptr) : 
 			isWalkable(w),
 			CollisionBox(col),
-			DebugTextRender(text),
-			blockPercentage(bp),
-			Unit(u) {}
+			DebugTextRender(text){}
 };
 
 UCLASS(BlueprintType, Blueprintable)
@@ -120,6 +134,9 @@ protected:
 	UPROPERTY()
 		TMap<FIntVector, FObstucle> obstucles;
 
+	
+		TMap<FBoarderKey, FObstucle> WallObstucles;
+
 	UPROPERTY()
 		TArray<AGridObject*> GridObjects;
 
@@ -151,5 +168,8 @@ public:
 		static TArray<FIntVector> CreatePathFromRoutes(TMap<FIntVector, FIntVector> cameFrom, FIntVector Dest);
 
 	UFUNCTION(BlueprintCallable)
-	TMap<FIntVector, FObstucle> GetObstucles() const { return obstucles; }
+		TMap<FIntVector, FObstucle> GetObstucles() const { return obstucles; }
+
+	//UFUNCTION(BlueprintCallable)
+		TMap<FBoarderKey, FObstucle> GetWallObstucles() const { return WallObstucles; }
 };

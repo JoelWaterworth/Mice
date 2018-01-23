@@ -35,6 +35,8 @@ struct FGridTransform
 		int blockPercentage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool isBorder;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool isRightHandCorner; //this is for the corners of walls where the mesh will prevent objects passing on two different directions. Furthermore the second direction will always be clockwise to the direction of the grid object
 
 public:
 
@@ -44,13 +46,15 @@ public:
 		EDirection direction = EDirection::D_Forward,
 		TArray<FIntVector> blockedTiles = TArray<FIntVector>(),
 		int bp = 100,
-		bool border = false) :
+		bool border = false,
+		bool corner = false) :
 			Origin(origin),
 			WalkablePosistions(walkablePosistions),
 			Direction(direction),
 			BlockedTiles(blockedTiles),
 			blockPercentage(bp),
-			isBorder(border){}
+			isBorder(border),
+			isRightHandCorner(corner){}
 };
 
 

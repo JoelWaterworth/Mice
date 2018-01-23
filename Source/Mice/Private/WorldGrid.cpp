@@ -214,7 +214,32 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 		AGridObject* object = *ActorItr;
 		trans.Add(object->GridOrigin);
 		for (FIntVector& pos : object->GridOrigin.BlockedTiles) {
-			obstucles.Add(pos + object->GridOrigin.Origin, FObstucle());
+			FIntVector loc = pos + object->GridOrigin.Origin;
+			if (object->GridOrigin.isBorder) {
+				auto boarder = [](FIntVector loc, FIntVector outer_offset, FIntVector righthand,TMap<FBoarderKey, FObstucle>& WallObstucles, AGridObject* object) {
+					WallObstucles.Add(FBoarderKey(loc, loc + outer_offset),
+						FObstucle(object->GridOrigin.blockPercentage));
+					if (object->GridOrigin.isRightHandCorner) {
+						WallObstucles.Add(FBoarderKey(loc, loc + FIntVector(1, 0, 0)),
+							FObstucle(object->GridOrigin.blockPercentage));
+					};
+				};
+				switch (object->GridOrigin.Direction) {
+					case EDirection::D_Forward :
+						boarder(loc, FIntVector(0, 1, 0), FIntVector(1, 0, 0), WallObstucles, object);
+						break;
+					case EDirection::D_Rightward:
+						boarder(loc, FIntVector(1, 0, 0), FIntVector(0, -1, 0), WallObstucles, object);
+						break;
+				default:
+					break;
+				}
+			}
+			else
+			{
+				obstucles.Add(loc,
+					FObstucle(object->GridOrigin.blockPercentage));
+			}
 		}
 	}
 
@@ -250,6 +275,7 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 
 void AWorldGrid::DebugPath(TMap<FIntVector, float> gScore)
 {
+	/*
 	for (TPair<FIntVector, FGridTile>& tile : gridTiles)
 	{
 		if (tile.Value.DebugTextRender)
@@ -268,7 +294,7 @@ void AWorldGrid::DebugPath(TMap<FIntVector, float> gScore)
 				tile->DebugTextRender->SetText(FText::FromString(FString::SanitizeFloat(elem.Value)));
 			}
 		}
-	}
+	}*/
 }
 
 TArray<FIntVector> AWorldGrid::GetNeighbours(FIntVector origin)
