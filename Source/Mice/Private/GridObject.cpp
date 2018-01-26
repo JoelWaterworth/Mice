@@ -14,25 +14,9 @@ AGridObject::AGridObject()
 
 void AGridObject::PostEditMove(bool bFinished)
 {
-	if (bFinished && RootComponent != nullptr && GetWorld() != nullptr)
+	if (bFinished)
 	{
-		auto loc = GetActorLocation();
-
-		TArray<AActor*> worldGrids;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWorldGrid::StaticClass(), worldGrids);
-		if (worldGrids.Num() == 0) {
-			AActor::PostEditMove(bFinished);
-			return;
-		};
-		AWorldGrid* worldGrid = Cast<AWorldGrid>(worldGrids[0]);
-		if (worldGrid)
-		{
-			FIntVector offset = worldGrid->LocationToVector(loc);
-			FRotator rotOffset = worldGrid->GetActorRotation();
-
-			RootComponent->SetWorldLocation(worldGrid->VectorToWorldTransform(offset).GetLocation());
-			GridOrigin.Origin = offset;
-		}
+		UpdatePosition();
 	}
 	
 	AActor::PostEditMove(bFinished);
@@ -54,4 +38,38 @@ FGridObjectTree AGridObject::GetObjectTree()
 		}
 	};
 	return tree;
+}
+
+void AGridObject::UpdatePosition()
+{
+	if (RootComponent != nullptr && GetWorld() != nullptr)
+	{
+		auto loc = GetActorLocation();
+
+		TArray<AActor*> worldGrids;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWorldGrid::StaticClass(), worldGrids);
+		if (worldGrids.Num() == 0)
+		{
+			return;
+		};
+		AWorldGrid* worldGrid = Cast<AWorldGrid>(worldGrids[0]);
+		if (worldGrid)
+		{
+			FIntVector offset = worldGrid->LocationToVector(loc);
+			FRotator rotOffset = worldGrid->GetActorRotation();
+
+			RootComponent->SetWorldLocation(worldGrid->VectorToWorldTransform(offset).GetLocation());
+			GridOrigin.Origin = offset;
+		}
+		TArray<UActorComponent*> actors = TArray<UActorComponent*>();
+		GetComponents<UActorComponent>(actors);
+		for (auto* actor : actors)
+		{
+			AGridObject* gridObject = Cast<AGridObject>(actor);
+			if (gridObject)
+			{
+				gridObject->UpdatePosition();
+			}
+		}
+	}
 }

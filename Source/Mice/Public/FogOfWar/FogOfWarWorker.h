@@ -1,16 +1,15 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-#include "HAL/Runnable.h"
-#include "CoreMinimal.h"
+
+
 
 /**
- * 
- */
-
+* Worker thread for updating the fog of war data.
+*/
 class AFogOfWarManager;
 
-class AFogOfWarWorker: public FRunnable
+class MICE_API AFogOfWarWorker : public FRunnable
 {
 	//Thread to run the FRunnable on
 	FRunnableThread* Thread;
@@ -18,7 +17,7 @@ class AFogOfWarWorker: public FRunnable
 	//Pointer to our manager
 	AFogOfWarManager* Manager;
 
-	//Thread safe counter 
+	//Thread safe counter
 	FThreadSafeCounter StopTaskCounter;
 
 public:
@@ -33,8 +32,11 @@ public:
 
 	//Method to perform work
 	void UpdateFowTexture();
-
 	bool bShouldUpdate = false;
+	bool isWriteUnFog = false;
+	bool isWriteFow = false;
+	bool isWriteTerraIncog = false;
+	bool bCheckActorInTerraIncog = false;//Bool, is the actor in terra incognita territory
 
 	void ShutDown();
 };

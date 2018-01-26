@@ -97,4 +97,6 @@ public:
 	//if it has no children this will be empty
 	UFUNCTION(BlueprintCallable)
 		FGridObjectTree GetObjectTree();
+
+	void UpdatePosition();
 };
