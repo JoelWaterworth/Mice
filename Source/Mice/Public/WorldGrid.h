@@ -53,7 +53,6 @@ public:
 
 	FORCEINLINE friend uint32 GetTypeHash(const FBoarderKey& Key)
 	{
-
 		return FCrc::MemCrc_DEPRECATED(&Key, sizeof(FBoarderKey));
 	}
 };
