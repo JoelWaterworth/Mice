@@ -146,7 +146,7 @@ TMap<FIntVector, FIntVector> AWorldGrid::CalculatePaths(AUnit * Unit, int32 Limi
 
 					if (x)
 					{
-						if ((currentScore < Limit) && (currentScore <  *x))
+						if (currentScore < Limit && currentScore <  *x)
 						{
 							gScore.Add(neighbour, currentScore);
 							roots.Add(neighbour, current);
@@ -164,8 +164,6 @@ TMap<FIntVector, FIntVector> AWorldGrid::CalculatePaths(AUnit * Unit, int32 Limi
 			}
 		}
 	}
-
-	DebugPath(gScore);
 
 	return roots;
 }
@@ -226,6 +224,7 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 	waste.Empty();
 	gridTiles.Empty();
 	obstucles.Empty();
+	WallObstucles.Empty();
 
 	TArray<FGridTransform> trans;
 
@@ -280,7 +279,7 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 				FIntVector loc = pos + tran.Origin;
 				int32 x = loc.X, y = loc.Y, z = loc.Z;
 				FVector vec = FVector((float)(x * spacing), (float)(y * spacing), (float)(z * spacing)) + FVector(spacing / 2, spacing / 2, 0.0f);
-
+				/*
 				UGridCollision* col = NewObject<UGridCollision>(this, UGridCollision::StaticClass());
 				if (col) {
 					col->RegisterComponent();
@@ -292,7 +291,8 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 					FTransform colTrans = FTransform(FRotator(0.0f), vec);
 					col->SetRelativeTransform(colTrans);
 				}
-				gridTiles.Add(FIntVector(x, y, z), FGridTile(true, col));
+				*/
+				gridTiles.Add(FIntVector(x, y, z), FGridTile());
 			}
 		}
 	}
@@ -326,22 +326,79 @@ void AWorldGrid::DebugPath(TMap<FIntVector, float> gScore)
 	}*/
 }
 
-TArray<FIntVector> AWorldGrid::GetNeighbours(FIntVector origin)
-{
+TArray<FIntVector> AWorldGrid::GetNeighbours(FIntVector origin) {
+	auto direction = [](FIntVector pos) -> TArray<EDirection> {
+		auto plah = [](int32 x, EDirection posDir, EDirection negDir, TArray<EDirection>& dirs) {
+			if (x > 0) {
+				dirs.Add(posDir);
+			} else if (x < 0) {
+				dirs.Add(negDir);
+			}
+		};
+		TArray<EDirection> dirs = TArray<EDirection>();
+		plah(pos.Y, EDirection::D_Forward, EDirection::D_Forward, dirs);
+		plah(pos.X, EDirection::D_Rightward, EDirection::D_Leftward, dirs);
+		plah(pos.Z, EDirection::D_Upward, EDirection::D_Downward, dirs);
+		return dirs;
+	};
+
+	auto opposite = [](EDirection dir) -> EDirection {
+		switch (dir) {
+		case EDirection::D_Forward:
+			return EDirection::D_Backward;
+		case EDirection::D_Backward:
+			return EDirection::D_Forward;
+		case EDirection::D_Rightward:
+			return EDirection::D_Leftward;
+		case EDirection::D_Leftward:
+			return EDirection::D_Rightward;
+		case EDirection::D_Upward:
+			return EDirection::D_Downward;
+		case EDirection::D_Downward:
+			return EDirection::D_Upward;
+		default:
+			return EDirection::D_Forward;
+		}
+	};
+
+	auto addDir = [](EDirection dir, FIntVector pos) -> FIntVector {
+		switch (dir) {
+		case EDirection::D_Forward:
+			return pos + FIntVector(0,1,0);
+		case EDirection::D_Backward:
+			return pos + FIntVector(0, -1, 0);
+		case EDirection::D_Rightward:
+			return pos + FIntVector(1, 0, 0);
+		case EDirection::D_Leftward:
+			return pos + FIntVector(-1, 1, 0);
+		default:
+			return pos;
+		}
+	};
+
 	TArray<FIntVector> neighbours = TArray<FIntVector>();
 
-	for (int32 x = -1; x < 2; x++)
-	{
-		for (int32 y = -1; y < 2; y++)
-		{
-			for (int32 z = -1; z < 2; z++)
-			{
-				if (!(x == 0 && y == 0))
-				{
-					FIntVector pos = FIntVector(x, y, z) + origin;
-					if (gridTiles.Contains(pos))
-					{
-						neighbours.Add(pos);
+	for (int32 x = -1; x < 2; x++) {
+		for (int32 y = -1; y < 2; y++) {
+			for (int32 z = -1; z < 2; z++) {
+				if (!(x == 0 && y == 0)) {
+					FIntVector dir = FIntVector(x, y, z);
+					TArray<EDirection> odirs = direction(dir);
+					FIntVector pos = dir + origin;
+					if (gridTiles.Contains(pos)) {
+						bool con = true;
+						auto odirs = direction(dir);
+						for (EDirection& odir: odirs) {
+							con = WallObstucles.Contains(FBoarderKey(odir, origin)) ? false : con;
+							con = WallObstucles.Contains(FBoarderKey(opposite(odir), addDir(odir, origin))) ? false : con;
+							auto s = obstucles.Find(addDir(odir, origin));
+							if (s) {
+								con = s->isUpToEdge ? false : con;
+							}
+						}
+						if (con) {
+							neighbours.Add(pos);
+						}
 					}
 				}
 			}

@@ -20,12 +20,15 @@ struct FObstucle {
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100"))
 		int blockPercentage;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool isUpToEdge;
 public:
 
 	FObstucle(
-		int bp = 100):
-		blockPercentage(bp){}
+		int bp = 100,
+		bool onEdge = true):
+		blockPercentage(bp),
+		isUpToEdge(onEdge){}
 };
 
 USTRUCT(BlueprintType)
@@ -135,10 +138,10 @@ protected:
 
 	TArray<FIntVector> GetNeighbours(FIntVector origin);
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 		TMap<FIntVector, FObstucle> obstucles;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 		TMap<FBoarderKey, FObstucle> WallObstucles;
 
 	UPROPERTY()
