@@ -11,7 +11,7 @@ AUnitSpawn::AUnitSpawn()
 	PrimaryActorTick.bCanEverTick = false;
 
 }
-
+#if WITH_EDITOR
 void AUnitSpawn::PostEditMove(bool bFinished)
 {
 	if (bFinished && RootComponent != nullptr && GetWorld() != nullptr)
@@ -38,3 +38,4 @@ void AUnitSpawn::PostEditMove(bool bFinished)
 
 	AActor::PostEditMove(bFinished);
 }
+#endif

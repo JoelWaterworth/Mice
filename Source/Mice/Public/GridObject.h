@@ -87,9 +87,9 @@ public:
 	// Sets default values for this actor's properties
 	AGridObject();
 
-protected:
-
+#if WITH_EDITOR
 	virtual void PostEditMove(bool bFinished) override;
+#endif
 	
 public:
 

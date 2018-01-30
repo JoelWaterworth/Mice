@@ -16,11 +16,13 @@ public:
 	// Sets default values for this actor's properties
 	AUnitSpawn();
 
+#if WITH_EDITOR
+	virtual void PostEditMove(bool bFinished) override;
+#endif
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FIntVector origin;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		ETeam team;
-protected:
-	virtual void PostEditMove(bool bFinished) override;
 };

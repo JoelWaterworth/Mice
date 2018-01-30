@@ -12,6 +12,7 @@ AGridObject::AGridObject()
 
 }
 
+#if WITH_EDITOR
 void AGridObject::PostEditMove(bool bFinished)
 {
 	if (bFinished)
@@ -21,6 +22,7 @@ void AGridObject::PostEditMove(bool bFinished)
 	
 	AActor::PostEditMove(bFinished);
 }
+#endif
 
 FGridObjectTree AGridObject::GetObjectTree()
 {
