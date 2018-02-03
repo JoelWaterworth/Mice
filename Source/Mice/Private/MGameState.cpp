@@ -80,3 +80,8 @@ void AMGameState::ExecuteCommands(TMap<AUnit*, UMCommand*> commands)
 		}
 	}
 }
+
+void AMGameState::ExecuteCommand(UMCommand* command, AUnit* target)
+{
+	command->Run(target);
+}

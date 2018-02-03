@@ -40,6 +40,25 @@ void AMPlayerController::ServerSubmitCommands_Implementation()
 	}
 }
 
+bool AMPlayerController::RunCommand_Validate(UMCommand* command, AUnit* unit)
+{
+	return true;
+}
+
+void AMPlayerController::RunCommand_Implementation(UMCommand* command, AUnit* unit)
+{
+	AMGameState* gameState = Cast<AMGameState>(GetWorld()->GetGameState());
+	if (gameState)
+	{
+		gameState->ExecuteCommand(command, unit);
+	}
+	else
+	{
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("gamestate is invalid"));
+	}
+}
+
 void AMPlayerController::UpdatePlayerTeam_Implementation(ETeam team)
 {
 

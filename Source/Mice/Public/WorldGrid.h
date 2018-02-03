@@ -9,6 +9,7 @@
 #include "Runtime/Engine/Classes/Components/TextRenderComponent.h"
 #include "Runtime/Engine/Classes/Components/InstancedStaticMeshComponent.h"
 #include "Misc/Crc.h"
+#include "Engine/BlockingVolume.h"
 #include "GameFramework/Actor.h"
 #include "WorldGrid.generated.h"
 
@@ -133,6 +134,9 @@ protected:
 	virtual void BeginPlay() override;
 
 	virtual void OnConstruction(const FTransform& Transform) override;
+
+	UFUNCTION()
+	bool checkBlockingVolume(FIntVector Pos, TArray<ABlockingVolume*> GridBlockingVolumes);
 
 	void DebugPath(TMap<FIntVector, float> gScore);
 

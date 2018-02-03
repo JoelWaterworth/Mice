@@ -27,6 +27,9 @@ public:
 	UFUNCTION(reliable, server, WithValidation, BlueprintCallable)
 		void ServerSubmitCommands();
 
+	UFUNCTION(reliable, server, WithValidation, BlueprintCallable)
+		void RunCommand(UMCommand* command, AUnit* unit);
+
 	UPROPERTY(Replicated, BlueprintReadWrite)
 		TMap<AUnit*, UMCommand*> commands;
 

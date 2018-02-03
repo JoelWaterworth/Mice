@@ -12,8 +12,10 @@ class AMPlayerController;
 UENUM(BlueprintType)
 enum class EUnitState : uint8
 {
-	US_Idle 	UMETA(DisplayName = "Idle"),
-	US_Walk 	UMETA(DisplayName = "Walk")
+	US_Idle 		UMETA(DisplayName = "Idle"),
+	US_Walk 		UMETA(DisplayName = "Walk"),
+	US_Shooting		UMETA(DisplayName = "Shooting"),
+	US_Overwatch	UMETA(DisplayName = "Overwatch"),
 };
 
 UCLASS(BlueprintType, Blueprintable)

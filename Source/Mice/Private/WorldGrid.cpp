@@ -226,6 +226,14 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 	obstucles.Empty();
 	WallObstucles.Empty();
 
+	TArray<ABlockingVolume*> GridBlockingVolumes;
+
+	for (TActorIterator<ABlockingVolume> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		ABlockingVolume* object = *ActorItr;
+		GridBlockingVolumes.Push(object);
+	}
+
 	TArray<FGridTransform> trans;
 
 	for (TActorIterator<AGridObject> ActorItr(GetWorld()); ActorItr; ++ActorItr)
@@ -275,21 +283,23 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 	{
 		for (FIntVector& pos : tran.WalkablePosistions)
 		{
-			if (!obstucles.Contains(pos)) {
+			bool bInObstucle = obstucles.Contains(pos);
+			bool bInBlockingVolume = checkBlockingVolume(pos, GridBlockingVolumes);
+			if (!(bInObstucle || bInBlockingVolume)) {
 				FIntVector loc = pos + tran.Origin;
 				int32 x = loc.X, y = loc.Y, z = loc.Z;
 				FVector vec = FVector((float)(x * spacing), (float)(y * spacing), (float)(z * spacing)) + FVector(spacing / 2, spacing / 2, 0.0f);
 				/*
 				UGridCollision* col = NewObject<UGridCollision>(this, UGridCollision::StaticClass());
 				if (col) {
-					col->RegisterComponent();
-					waste.Add(col);
-					col->SetBoxExtent(FVector(spacing / 2, spacing / 2, 10.0f), true);
-					col->pos = FIntVector(x, y, 0);
-					col->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
-					col->AttachToComponent(root, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-					FTransform colTrans = FTransform(FRotator(0.0f), vec);
-					col->SetRelativeTransform(colTrans);
+				col->RegisterComponent();
+				waste.Add(col);
+				col->SetBoxExtent(FVector(spacing / 2, spacing / 2, 10.0f), true);
+				col->pos = FIntVector(x, y, 0);
+				col->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
+				col->AttachToComponent(root, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+				FTransform colTrans = FTransform(FRotator(0.0f), vec);
+				col->SetRelativeTransform(colTrans);
 				}
 				*/
 				gridTiles.Add(FIntVector(x, y, z), FGridTile());
@@ -301,6 +311,19 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 	//Register all the components
 	RegisterAllComponents();
 }
+
+bool AWorldGrid::checkBlockingVolume(FIntVector Pos, TArray<ABlockingVolume*> GridBlockingVolumes) {
+	for (ABlockingVolume* vol : GridBlockingVolumes) {
+		FVector max = vol->Brush->Bounds.Origin + vol->GetActorLocation() + vol->Brush->Bounds.BoxExtent;
+		FVector min = vol->Brush->Bounds.Origin + vol->GetActorLocation() - vol->Brush->Bounds.BoxExtent;
+		FVector pos = FVector(Pos * 100) + FVector(50.0f);
+		if ((pos.X >= min.X && pos.Y >= min.Y && pos.Z >= min.Z) &&
+			(pos.X <= max.X && pos.Y <= max.Y && pos.Z <= max.Z)) {
+			return true;
+		}
+	}
+	return false;
+};
 
 void AWorldGrid::DebugPath(TMap<FIntVector, float> gScore)
 {
