@@ -34,13 +34,6 @@ AUnit::AUnit()
 	bReplicates = true;
 }
 
-// Called when the game starts or when spawned
-void AUnit::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
 void AUnit::UpdatePos_Implementation(FIntVector n_pos)
 {
 	pos = n_pos;
