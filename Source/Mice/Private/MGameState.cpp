@@ -22,6 +22,8 @@ void AMGameState::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLi
 	DOREPLIFETIME(AMGameState, isRedReady);
 }
 
+void AMGameState::SumbitCommand_Implementation(AMPlayerController* playerController, AUnit* unit){}
+
 void AMGameState::SumbitCommands_Implementation(AMPlayerController * playerController)
 {
 	if (playerController)

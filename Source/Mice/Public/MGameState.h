@@ -21,7 +21,10 @@ public:
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 		void SumbitCommands(AMPlayerController* playerController);
-	
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+		void SumbitCommand(AMPlayerController* playerController, AUnit* unit);
+
 	UFUNCTION(BlueprintCallable)
 		void ExecuteCommand(UMCommand* command, AUnit* target);
 
