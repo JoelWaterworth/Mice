@@ -164,7 +164,6 @@ TMap<FIntVector, FIntVector> AWorldGrid::CalculatePaths(AUnit * Unit, int32 Limi
 			}
 		}
 	}
-
 	return roots;
 }
 

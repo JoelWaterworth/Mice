@@ -51,6 +51,9 @@ void AMGameMode::BeginPlay()
 						unit->UpdatePos(pos);
 						unit->team = ETeam::T_Blue;
 					}
+					else {
+
+					}
 				}
 
 				for (FIntVector& pos : worldGrid->RedSpawnPoints)
@@ -61,6 +64,9 @@ void AMGameMode::BeginPlay()
 					{
 						unit->UpdatePos(pos);
 						unit->team = ETeam::T_Red;
+					}
+					else {
+
 					}
 				}
 			}
