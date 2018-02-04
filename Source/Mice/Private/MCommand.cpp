@@ -6,4 +6,6 @@
 #include "UnrealNetwork.h"
 
 void UMCommand::Run_Implementation(AUnit* target)
-{}
+{
+	target->bHasExecutedCommand = true;
+}

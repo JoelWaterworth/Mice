@@ -17,6 +17,8 @@ void AUnit::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetime
 
 	DOREPLIFETIME(AUnit, team);
 	DOREPLIFETIME(AUnit, pos);
+	DOREPLIFETIME(AUnit, bHasExecutedCommand);
+	DOREPLIFETIME(AUnit, command);
 }
 
 // Sets default values

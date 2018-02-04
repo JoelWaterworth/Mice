@@ -7,6 +7,8 @@
 #include "GameFramework/Actor.h"
 #include "Unit.generated.h"
 
+class UMCommand;
+
 class AMPlayerController;
 
 UENUM(BlueprintType)
@@ -50,4 +52,8 @@ public:
 
 	UPROPERTY(Replicated, BlueprintReadWrite)
 		FIntVector pos;
+	UPROPERTY(Replicated, BlueprintReadWrite)
+		bool bHasExecutedCommand;
+	UPROPERTY(Replicated, BlueprintReadWrite)
+		UMCommand* command;
 };
