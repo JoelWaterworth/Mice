@@ -17,20 +17,6 @@ APlayerCamera::APlayerCamera()
 	Camera->SetRelativeTransform(FTransform(FRotator(-45.0f, -45.0f, 0.0f)));
 }
 
-// Called when the game starts or when spawned
-void APlayerCamera::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
-// Called every frame
-void APlayerCamera::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
 // Called to bind functionality to input
 void APlayerCamera::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {

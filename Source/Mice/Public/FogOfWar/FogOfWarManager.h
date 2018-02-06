@@ -103,7 +103,7 @@ class MICE_API AFogOfWarManager : public AActor
 		TArray<float> blurKernel;
 
 	//Store the actors that will be unveiling the FOW-texture.
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		TArray<AActor*> FowActors;
 
 	//DEBUG: Time it took to update the fow texture

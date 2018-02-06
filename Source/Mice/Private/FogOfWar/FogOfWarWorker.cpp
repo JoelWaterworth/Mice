@@ -1,7 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+
 #include "FogOfWarWorker.h"
 #include "FogOfWarManager.h"
+#include "RegisterToFOW.h"
 
 AFogOfWarWorker::AFogOfWarWorker() {}
 
@@ -88,11 +90,11 @@ void AFogOfWarWorker::UpdateFowTexture() {
 			}
 		}
 
-		//This is checking if the current actor is able to:
-		//A. Fully unveil the texels, B. unveil FOW, C, Unveil Terra Incognita
-		//Accessing the registerToFOW property Unfog boolean
-		//I declared the .h file for RegisterToFOW
-		//Dont forget the braces >()
+		if (*Itr != nullptr) {
+			isWriteUnFog = (*Itr)->FindComponentByClass<URegisterToFOW>()->WriteUnFog;
+			isWriteFow = (*Itr)->FindComponentByClass<URegisterToFOW>()->WriteFow;
+			isWriteTerraIncog = (*Itr)->FindComponentByClass<URegisterToFOW>()->WriteTerraIncog;
+		}
 
 		if (isWriteUnFog) {
 			//Unveil the positions our actors are currently looking at
@@ -133,6 +135,20 @@ void AFogOfWarWorker::UpdateFowTexture() {
 						}
 					}
 				}
+			}
+		}
+
+		if (*Itr != nullptr) {
+			bCheckActorInTerraIncog = (*Itr)->FindComponentByClass<URegisterToFOW>()->bCheckActorTerraIncog;
+		}
+		if (bCheckActorInTerraIncog) {
+			//if the current position textureSpacePosXY in the UnfoggedData bool array is false the actor is in the Terra Incognita
+			if (Manager->UnfoggedData[textureSpacePos.X + textureSpacePos.Y * Manager->TextureSize] == false) {
+				(*Itr)->FindComponentByClass<URegisterToFOW>()->isActorInTerraIncog = true;
+
+			}
+			else {
+				(*Itr)->FindComponentByClass<URegisterToFOW>()->isActorInTerraIncog = false;
 			}
 		}
 	}
