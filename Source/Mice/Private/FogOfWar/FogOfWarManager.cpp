@@ -1,7 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#include "Mice.h"
 #include "FogOfWarManager.h"
-
+#include "RegisterToFOW.h"
 
 // Sets default values
 AFogOfWarManager::AFogOfWarManager(const FObjectInitializer &FOI) : Super(FOI) {
@@ -46,11 +47,10 @@ void AFogOfWarManager::BeginPlay() {
 void AFogOfWarManager::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
 	if (FOWTexture && LastFOWTexture && bHasFOWTextureUpdate && bIsDoneBlending) {
-		TFunction< void(uint8*, const FUpdateTextureRegion2D*)> cleanUp;
 		LastFOWTexture->UpdateResource();
-		LastFOWTexture->UpdateTextureRegions((int32)0, (uint32)1, textureRegions, (uint32)(4 * TextureSize), (uint32)4, (uint8*)LastFrameTextureData.GetData(), cleanUp);
+		UpdateTextureRegions(LastFOWTexture, (int32)0, (uint32)1, textureRegions, (uint32)(4 * TextureSize), (uint32)4, (uint8*)LastFrameTextureData.GetData(), false);
 		FOWTexture->UpdateResource();
-		FOWTexture->UpdateTextureRegions((int32)0, (uint32)1, textureRegions, (uint32)(4 * TextureSize), (uint32)4, (uint8*)TextureData.GetData(), cleanUp);
+		UpdateTextureRegions(FOWTexture, (int32)0, (uint32)1, textureRegions, (uint32)(4 * TextureSize), (uint32)4, (uint8*)TextureData.GetData(), false);
 		bHasFOWTextureUpdate = false;
 		bIsDoneBlending = false;
 		//Trigger the blueprint update
@@ -200,4 +200,82 @@ bool AFogOfWarManager::GetIsBlurEnabled() {
 
 bool AFogOfWarManager::GetIsTextureFileEnabled() {
 	return bUseTextureFile;
+}
+
+void AFogOfWarManager::LogNames() {
+	//Iterate over FowActors TArray
+	for (auto& Actor : FowActors) {
+
+		FString Name = Actor->GetName();
+		UE_LOG(LogTemp, Warning, TEXT("The name of this actor is: %s"), *Name);
+		Name = Actor->FindComponentByClass<URegisterToFOW>()->GetName();
+		UE_LOG(LogTemp, Warning, TEXT("And the actor has a component: %s"), *Name);
+		bool temp = Actor->FindComponentByClass<URegisterToFOW>()->WriteTerraIncog;
+		if (temp) {
+			UE_LOG(LogTemp, Warning, TEXT("can write Terra Incognita: TRUE"));
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("can write Terra Incognita: FALSE"));
+		}
+
+
+	}
+
+	//FString TempString = GetName();
+}
+
+void AFogOfWarManager::UpdateTextureRegions(UTexture2D* Texture, int32 MipIndex, uint32 NumRegions, FUpdateTextureRegion2D* Regions, uint32 SrcPitch, uint32 SrcBpp, uint8* SrcData, bool bFreeData)
+{
+	if (Texture && Texture->Resource)
+	{
+		struct FUpdateTextureRegionsData
+		{
+			FTexture2DResource* Texture2DResource;
+			int32 MipIndex;
+			uint32 NumRegions;
+			FUpdateTextureRegion2D* Regions;
+			uint32 SrcPitch;
+			uint32 SrcBpp;
+			uint8* SrcData;
+		};
+
+		FUpdateTextureRegionsData* RegionData = new FUpdateTextureRegionsData;
+
+		RegionData->Texture2DResource = (FTexture2DResource*)Texture->Resource;
+		RegionData->MipIndex = MipIndex;
+		RegionData->NumRegions = NumRegions;
+		RegionData->Regions = Regions;
+		RegionData->SrcPitch = SrcPitch;
+		RegionData->SrcBpp = SrcBpp;
+		RegionData->SrcData = SrcData;
+
+		ENQUEUE_UNIQUE_RENDER_COMMAND_TWOPARAMETER(
+			UpdateTextureRegionsData,
+			FUpdateTextureRegionsData*, RegionData, RegionData,
+			bool, bFreeData, bFreeData,
+			{
+				for (uint32 RegionIndex = 0; RegionIndex < RegionData->NumRegions; ++RegionIndex)
+				{
+					int32 CurrentFirstMip = RegionData->Texture2DResource->GetCurrentFirstMip();
+					if (RegionData->MipIndex >= CurrentFirstMip)
+					{
+						RHIUpdateTexture2D(
+							RegionData->Texture2DResource->GetTexture2DRHI(),
+							RegionData->MipIndex - CurrentFirstMip,
+							RegionData->Regions[RegionIndex],
+							RegionData->SrcPitch,
+							RegionData->SrcData
+							+ RegionData->Regions[RegionIndex].SrcY * RegionData->SrcPitch
+							+ RegionData->Regions[RegionIndex].SrcX * RegionData->SrcBpp
+						);
+					}
+				}
+		if (bFreeData)
+		{
+			FMemory::Free(RegionData->Regions);
+			FMemory::Free(RegionData->SrcData);
+		}
+		delete RegionData;
+			});
+	}
 }

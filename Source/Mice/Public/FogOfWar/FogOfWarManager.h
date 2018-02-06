@@ -11,11 +11,11 @@ UCLASS()
 class MICE_API AFogOfWarManager : public AActor
 {
 	GENERATED_UCLASS_BODY()
-	//AFogOfWarManager(const FObjectInitializer & FOI);
-	virtual ~AFogOfWarManager();
+		//AFogOfWarManager(const FObjectInitializer & FOI);
+		virtual ~AFogOfWarManager();
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
-	public:
+public:
 	//Triggers a update in the blueprint
 	UFUNCTION(BlueprintNativeEvent)
 		void OnFowTextureUpdated(UTexture2D* currentTexture, UTexture2D* lastTexture);
@@ -26,6 +26,17 @@ class MICE_API AFogOfWarManager : public AActor
 	//Register an actor to influence the FOW-texture
 	UFUNCTION(BlueprintCallable, Category = FogOfWar)
 		void RegisterFowActor(AActor* Actor);
+
+	//Stolen from https://wiki.unrealengine.com/Dynamic_Textures
+	void UpdateTextureRegions(
+		UTexture2D* Texture,
+		int32 MipIndex,
+		uint32 NumRegions,
+		FUpdateTextureRegion2D* Regions,
+		uint32 SrcPitch,
+		uint32 SrcBpp,
+		uint8* SrcData,
+		bool bFreeData);
 
 	//How far will an actor be able to see
 	//CONSIDER: Place it on the actors to allow for individual sight-radius
@@ -103,7 +114,7 @@ class MICE_API AFogOfWarManager : public AActor
 		TArray<float> blurKernel;
 
 	//Store the actors that will be unveiling the FOW-texture.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY()
 		TArray<AActor*> FowActors;
 
 	//DEBUG: Time it took to update the fow texture
@@ -115,7 +126,13 @@ class MICE_API AFogOfWarManager : public AActor
 	//Getter for the working thread
 	bool GetIsTextureFileEnabled();
 
+	//Temp method for logging an actor components names
+	UFUNCTION(BlueprintCallable, Category = FogOfWar)
+		void LogNames();
+
 private:
+
+	void UpdateFowTexture();
 
 	//Triggers the start of a new FOW-texture-update
 	void StartFOWTextureUpdate();
