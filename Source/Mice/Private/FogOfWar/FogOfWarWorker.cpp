@@ -96,11 +96,9 @@ void AFogOfWarWorker::UpdateFowTexture() {
 		//I declared the .h file for RegisterToFOW
 		//Dont forget the braces >()
 
-		if (*Itr != nullptr) {
-			isWriteUnFog = (*Itr)->FindComponentByClass<URegisterToFOW>()->WriteUnFog;
-			isWriteFow = (*Itr)->FindComponentByClass<URegisterToFOW>()->WriteFow;
-			isWriteTerraIncog = (*Itr)->FindComponentByClass<URegisterToFOW>()->WriteTerraIncog;
-		}
+		isWriteUnFog = Manager->WriteUnFog;
+		isWriteFow = Manager->WriteFow;
+		isWriteTerraIncog = Manager->WriteTerraIncog;
 
 
 
@@ -148,9 +146,8 @@ void AFogOfWarWorker::UpdateFowTexture() {
 
 		//Is the current actor marked for checking if is in terra incognita
 
-		if (*Itr != nullptr) {
-			bCheckActorInTerraIncog = (*Itr)->FindComponentByClass<URegisterToFOW>()->bCheckActorTerraIncog;
-		}
+		Manager->bCheckActorTerraIncog;
+
 		if (bCheckActorInTerraIncog) {
 			//if the current position textureSpacePosXY in the UnfoggedData bool array is false the actor is in the Terra Incognita
 			if (Manager->UnfoggedData[textureSpacePos.X + textureSpacePos.Y * Manager->TextureSize] == false) {
@@ -238,14 +235,8 @@ void AFogOfWarWorker::UpdateFowTexture() {
 							}
 
 						}
-
-
-
-
 					}
 				}
-
-
 			}
 		}
 	}

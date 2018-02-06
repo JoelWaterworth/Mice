@@ -38,10 +38,6 @@ AFogOfWarManager::~AFogOfWarManager() {
 void AFogOfWarManager::BeginPlay() {
 	Super::BeginPlay();
 	bIsDoneBlending = true;
-	AFogOfWarManager::StartFOWTextureUpdate();
-	//I commented this to remove the player from the FOW
-	//RegisterFowActor(GetWorld()->GetFirstPlayerController()->GetPawn());
-
 }
 
 void AFogOfWarManager::Tick(float DeltaSeconds) {
@@ -56,8 +52,6 @@ void AFogOfWarManager::Tick(float DeltaSeconds) {
 		//Trigger the blueprint update
 		OnFowTextureUpdated(FOWTexture, LastFOWTexture);
 	}
-
-
 
 	if (bIsFowTimerEnabled) {
 		//Keeping the Measure of the time outside the Worker thread, otherwise the it does not work

@@ -103,6 +103,18 @@ public:
 	UPROPERTY(EditAnywhere)
 		float FowTimeLimit = 0.1f;
 
+	UPROPERTY(EditAnywhere)
+		bool WriteUnFog = true;
+
+	UPROPERTY(EditAnywhere)
+		bool WriteFow = true;
+
+	UPROPERTY(EditAnywhere)
+		bool WriteTerraIncog = true;
+
+	UPROPERTY(EditAnywhere)
+		bool bCheckActorTerraIncog = false;
+
 	//Check to see if we have a new FOW-texture.
 	bool bHasFOWTextureUpdate = false;
 
@@ -132,9 +144,8 @@ public:
 
 private:
 
-	void UpdateFowTexture();
-
 	//Triggers the start of a new FOW-texture-update
+	UFUNCTION(BlueprintCallable, Category = FogOfWar)
 	void StartFOWTextureUpdate();
 
 	//Our dynamically updated texture
