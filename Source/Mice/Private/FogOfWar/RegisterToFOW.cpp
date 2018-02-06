@@ -37,7 +37,7 @@ void URegisterToFOW::BeginPlay()
 	if (Manager != nullptr) {
 		UE_LOG(LogTemp, Log, TEXT("Found Manager"));
 
-		Manager->RegisterFowActor(GetOwner());
+		//Manager->RegisterFowActor(GetOwner());
 	}
 	else {
 		UE_LOG(LogTemp, Log, TEXT("Please attach a FOW Manager"));

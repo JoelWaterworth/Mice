@@ -4,12 +4,33 @@
 
 #include "CoreMinimal.h"
 #include "MPlayerState.h"
+#include "Classes/Sound/SoundCue.h"
 #include "GameFramework/Actor.h"
 #include "Unit.generated.h"
 
-class UMCommand;
-
-class AMPlayerController;
+USTRUCT(BlueprintType)
+struct FWeapon
+{
+	GENERATED_BODY()
+		UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		UCurveFloat* projectProbArc;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		USoundCue* sound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int32 minDamage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int32 maxDamage;
+public:
+	FWeapon(
+		UCurveFloat* arc = nullptr,
+		USoundCue* s = nullptr,
+		int32 minD = 6,
+		int32 maxD = 8) :
+			projectProbArc(arc),
+			sound(s),
+			minDamage(minD),
+			maxDamage(maxD){}
+};
 
 UENUM(BlueprintType)
 enum class EUnitState : uint8
@@ -19,6 +40,10 @@ enum class EUnitState : uint8
 	US_Shooting		UMETA(DisplayName = "Shooting"),
 	US_Overwatch	UMETA(DisplayName = "Overwatch"),
 };
+
+class UMCommand;
+
+class AMPlayerController;
 
 UCLASS(BlueprintType, Blueprintable)
 class MICE_API AUnit : public AActor
@@ -38,6 +63,13 @@ public:
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "Team")
 		ETeam team;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Team")
+		FWeapon weapon;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float height = 150.0f;
+	UPROPERTY(EditAnywhere)
+		bool isActorInTerraIncog = false;
 
 protected:
 

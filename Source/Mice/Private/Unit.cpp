@@ -19,6 +19,7 @@ void AUnit::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetime
 	DOREPLIFETIME(AUnit, pos);
 	DOREPLIFETIME(AUnit, bHasExecutedCommand);
 	DOREPLIFETIME(AUnit, command);
+	DOREPLIFETIME(AUnit, weapon);
 }
 
 // Sets default values

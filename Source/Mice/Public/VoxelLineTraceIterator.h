@@ -12,14 +12,14 @@ struct FVoxelResult
 {
 	GENERATED_BODY()
 		UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FIntVector voxels;
+		FIntVector voxel;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		TArray<EDirection> direction;
 public:
 	FVoxelResult(
 		FIntVector out = FIntVector(),
 		TArray<EDirection> v = TArray<EDirection>()) :
-		voxels(out),
+		voxel(out),
 		direction(v) {}
 };
 
@@ -30,15 +30,19 @@ struct FIteratorReturn
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FVector impact_point;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		TArray<FVoxelResult> voxels;
+		TArray<FVoxelResult> in_voxels;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FVoxelResult out_voxel;
 
 public:
 
 	FIteratorReturn(
 		FVector out = FVector(),
-		TArray<FVoxelResult> v = TArray<FVoxelResult>()) :
+		TArray<FVoxelResult> v = TArray<FVoxelResult>(),
+		FVoxelResult o_v = FVoxelResult()) :
 			impact_point(out),
-			voxels(v){}
+			in_voxels(v),
+			out_voxel(o_v){}
 };
 
 /**

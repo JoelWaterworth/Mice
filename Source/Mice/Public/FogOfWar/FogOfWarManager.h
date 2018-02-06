@@ -7,6 +7,8 @@
 #include "RHI.h"
 #include "FogOfWarManager.generated.h"
 
+class AUnit;
+
 UCLASS()
 class MICE_API AFogOfWarManager : public AActor
 {
@@ -25,7 +27,7 @@ public:
 
 	//Register an actor to influence the FOW-texture
 	UFUNCTION(BlueprintCallable, Category = FogOfWar)
-		void RegisterFowActor(AActor* Actor);
+		void RegisterFowActor(AUnit* Actor);
 
 	//Stolen from https://wiki.unrealengine.com/Dynamic_Textures
 	void UpdateTextureRegions(
@@ -45,7 +47,7 @@ public:
 
 	//The number of samples per 100 unreal units
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FogOfWar)
-		float SamplesPerMeter = 2.0f;
+		float SamplesPerMeter = 1.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FogOfWar)
 		//FColor	ColorOne = FColor((uint8)255, (uint8)255, (uint8)255, 255);
@@ -66,9 +68,10 @@ public:
 
 	//Should we blur? It takes up quite a lot of CPU time...
 	UPROPERTY(EditAnywhere)
-		bool bIsBlurEnabled = true;
+		bool bIsBlurEnabled = false;
 
 	//The size of our textures
+	UPROPERTY(EditAnywhere)
 	uint32 TextureSize = 1024;
 
 	//Array containing what parts of the map we've unveiled.
@@ -126,8 +129,8 @@ public:
 		TArray<float> blurKernel;
 
 	//Store the actors that will be unveiling the FOW-texture.
-	UPROPERTY()
-		TArray<AActor*> FowActors;
+	UPROPERTY(BlueprintReadOnly)
+		TArray<AUnit*> FowActors;
 
 	//DEBUG: Time it took to update the fow texture
 	float fowUpdateTime = 0;

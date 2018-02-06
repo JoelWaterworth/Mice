@@ -85,7 +85,12 @@ void AFogOfWarManager::StartFOWTextureUpdate() {
 		LastFrameTextureData.Init(FColor(0, 0, 0, 255), arraySize);
 		HorizontalBlurData.Init(0, arraySize);
 		UnfoggedData.Init(false, arraySize);
-		FowThread = new AFogOfWarWorker(this);
+		AWorldGrid* worldGrid = nullptr;
+		for (TActorIterator<AWorldGrid> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		{
+			worldGrid = *ActorItr;
+		}
+		FowThread = new AFogOfWarWorker(this, worldGrid);
 
 		//Time stuff
 		FOWTimeArray.Init(0.0f, arraySize);
@@ -184,7 +189,7 @@ void AFogOfWarManager::debugTextureAccess() {
 
 }
 
-void AFogOfWarManager::RegisterFowActor(AActor* Actor) {
+void AFogOfWarManager::RegisterFowActor(AUnit* Actor) {
 	FowActors.Add(Actor);
 }
 
@@ -211,8 +216,6 @@ void AFogOfWarManager::LogNames() {
 		else {
 			UE_LOG(LogTemp, Warning, TEXT("can write Terra Incognita: FALSE"));
 		}
-
-
 	}
 
 	//FString TempString = GetName();

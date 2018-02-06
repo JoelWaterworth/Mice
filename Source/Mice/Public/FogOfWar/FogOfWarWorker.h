@@ -2,7 +2,7 @@
 
 #pragma once
 
-
+#include "WorldGrid.h"
 
 /**
 * Worker thread for updating the fog of war data.
@@ -17,12 +17,14 @@ class MICE_API AFogOfWarWorker : public FRunnable
 	//Pointer to our manager
 	AFogOfWarManager* Manager;
 
+	AWorldGrid* WorldGrid;
+
 	//Thread safe counter
 	FThreadSafeCounter StopTaskCounter;
 
 public:
 	AFogOfWarWorker();
-	AFogOfWarWorker(AFogOfWarManager* manager);
+	AFogOfWarWorker(AFogOfWarManager* manager, AWorldGrid* worldGrid);
 	virtual ~AFogOfWarWorker();
 
 	//FRunnable interface

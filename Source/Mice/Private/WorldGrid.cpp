@@ -20,9 +20,6 @@ AWorldGrid::AWorldGrid()
 	root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	InstanceMesh = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("InstanceMesh"));
 	InstanceMesh->SetupAttachment(root);
-
-	width = 10;
-	height = 10;
 	spacing = 100.0f;
 	
 	CollisionExtent = FVector(55.0f, 55.0f, 10.0f);
@@ -51,11 +48,11 @@ bool AWorldGrid::PlotLine(FVector s, FVector e)
 	{
 		FIteratorReturn iter = Component->next();
 		UE_LOG(LogWorld, Log, TEXT("start %s"), *Component->start.ToString());
-		for (auto& voxel_res : iter.voxels)
+		for (auto& voxel_res : iter.in_voxels)
 		{
-			UE_LOG(LogWorld, Log, TEXT("voxels %s"), *voxel_res.voxels.ToString());
-			FObstucle* k = obstucles.Find(voxel_res.voxels);
-			if (endtile == voxel_res.voxels)
+			UE_LOG(LogWorld, Log, TEXT("voxels %s"), *voxel_res.voxel.ToString());
+			FObstucle* k = obstucles.Find(voxel_res.voxel);
+			if (endtile == voxel_res.voxel)
 			{
 				return true;
 			}
@@ -77,6 +74,48 @@ void AWorldGrid::Tick(float DeltaTime)
 FTransform AWorldGrid::VectorToWorldTransform(FIntVector pos)
 {
 	return VectorToLocalTransform(pos) * GetActorTransform();
+}
+
+float AWorldGrid::CalculateProbabilityOfShot(FVector start, FVector end, AUnit* unit)
+{
+	return 1.0f;
+	FIntVector endTile = FIntVector(end / 100.0f);
+	FVector dir = (end - start) / 100.0f;
+	float f = unit->weapon.projectProbArc->GetFloatValue(dir.Size());
+	if (f <= 0.0f) {
+		return 0.0f;
+	}
+	UVoxelLineTraceIterator* iter = NewObject<UVoxelLineTraceIterator>(this, UVoxelLineTraceIterator::StaticClass());
+	iter->start = start / 100.0f;
+	iter->direction = dir;
+	while (true)
+	{
+		FIteratorReturn ret = iter->next();
+		for (EDirection& dir : ret.out_voxel.direction) {
+			auto* wall = WallObstucles.Find(FBoarderKey(dir, ret.out_voxel.voxel));
+			if (wall) {
+				return 0.0f;
+			}
+		}
+		for (FVoxelResult& res : ret.in_voxels) {
+			auto* solid = obstucles.Find(res.voxel);
+			if (solid) {
+				return 0.0f;
+			}
+
+			for (EDirection& dir : res.direction) {
+				auto* wall = WallObstucles.Find(FBoarderKey(dir, res.voxel));
+				if (wall) {
+					return 0.0f;
+				}
+			}
+			
+			if (endTile == res.voxel) {
+				return f;
+			}
+		}
+	}
+	return 0.0f;
 }
 
 FTransform AWorldGrid::VectorToLocalTransform(FIntVector pos)
@@ -282,6 +321,12 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 	{
 		for (FIntVector& pos : tran.WalkablePosistions)
 		{
+			if (pos.X < minX) {
+				minX = pos.X;
+			}
+			if (pos.Y < minY) {
+				minY = pos.Y;
+			}
 			bool bInObstucle = obstucles.Contains(pos);
 			bool bInBlockingVolume = checkBlockingVolume(pos, GridBlockingVolumes);
 			if (!(bInObstucle || bInBlockingVolume)) {

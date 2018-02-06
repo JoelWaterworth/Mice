@@ -93,6 +93,8 @@ public:
 	// Sets default values for this actor's properties
 	AWorldGrid();
 
+	UPROPERTY(EditAnywhere, Category = "Init")
+		bool Refresh;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		UInstancedStaticMeshComponent* InstanceMesh;
 
@@ -102,14 +104,10 @@ public:
 	UPROPERTY()
 		USceneComponent* root;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Init")
-		int32 height;
-
-	UPROPERTY(EditAnywhere, Category = "Init")
-		bool Refresh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Init")
-		int32 width;
+	UPROPERTY(VisibleAnywhere)
+		int32 minX;
+	UPROPERTY(VisibleAnywhere)
+		int32 minY;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Init")
 		int32 spacing;
@@ -166,7 +164,9 @@ public:
 	//The Transform is of the centre of the tile
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 		FTransform VectorToWorldTransform(FIntVector pos);
-
+	//The Transform is of the centre of the tile
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+		float CalculateProbabilityOfShot(FVector start, FVector end, AUnit* unit);
 	//The Transform is of the centre of the tile
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 		FTransform VectorToLocalTransform(FIntVector pos);
