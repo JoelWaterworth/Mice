@@ -78,7 +78,6 @@ FTransform AWorldGrid::VectorToWorldTransform(FIntVector pos)
 
 float AWorldGrid::CalculateProbabilityOfShot(FVector start, FVector end, AUnit* unit)
 {
-	return 1.0f;
 	FIntVector endTile = FIntVector(end / 100.0f);
 	FVector dir = (end - start) / 100.0f;
 	float f = unit->weapon.projectProbArc->GetFloatValue(dir.Size());

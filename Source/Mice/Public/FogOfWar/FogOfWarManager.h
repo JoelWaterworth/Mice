@@ -72,7 +72,7 @@ public:
 
 	//The size of our textures
 	UPROPERTY(EditAnywhere)
-	uint32 TextureSize = 1024;
+	uint32 TextureSize = 256;
 
 	//Array containing what parts of the map we've unveiled.
 	UPROPERTY()

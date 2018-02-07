@@ -131,17 +131,19 @@ void AFogOfWarWorker::UpdateFowTexture() {
 							//for every ray we would unveil all the points between the collision and origo using Bresenham's Line-drawing algorithm.
 							//However, the tracing doesn't seem like it takes much time at all (~0.02ms with four actors tracing circles of 18 texels each),
 							//it's the blurring that chews CPU..
-							if (WorldGrid->CalculateProbabilityOfShot(eyeHeight, currentPos, unit) > 0.0f ) {
+							if (!currentlyInSight.Contains(FVector2D(x, y))) {
+								if (!Manager->GetWorld()->LineTraceTestByChannel(eyeHeight, currentWorldSpacePos, ECC_WorldStatic, queryParams)) {
+								//if (WorldGrid->CalculateProbabilityOfShot(eyeHeight, currentPos, unit) > 0.0f) {
+									//Is the actor able to affect the terra incognita
 
-								//Is the actor able to affect the terra incognita
-
-								if (isWriteTerraIncog) {
-									//if the actor is able then
-									//Unveil the positions we are currently seeing
-									Manager->UnfoggedData[x + y * Manager->TextureSize] = true;
+									if (isWriteTerraIncog) {
+										//if the actor is able then
+										//Unveil the positions we are currently seeing
+										Manager->UnfoggedData[x + y * Manager->TextureSize] = true;
+									}
+									//Store the positions we are currently seeing.
+									currentlyInSight.Add(FVector2D(x, y));
 								}
-								//Store the positions we are currently seeing.
-								currentlyInSight.Add(FVector2D(x, y));
 							}
 						}
 					}
