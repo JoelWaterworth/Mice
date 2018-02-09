@@ -11,8 +11,8 @@ UENUM(BlueprintType)
 enum class EDirection : uint8
 {
 	D_Forward 	UMETA(DisplayName = "Forward"),
-	D_Backward 	UMETA(DisplayName = "Backward"),
 	D_Rightward UMETA(DisplayName = "Rightward"),
+	D_Backward 	UMETA(DisplayName = "Backward"),
 	D_Leftward 	UMETA(DisplayName = "Leftward"),
 	D_Upward	UMETA(DisplayName = "Upward"),
 	D_Downward 	UMETA(DisplayName = "Downward"),
@@ -50,7 +50,8 @@ public:
 		int bp = 100,
 		bool border = false,
 		bool onEdge = true,
-		bool corner = false) :
+		bool corner = false
+	) :
 			Origin(origin),
 			WalkablePosistions(walkablePosistions),
 			Direction(direction),
@@ -98,6 +99,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FGridTransform GridOrigin;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TArray<FGridTransform> GridChildren;
+
 	//if it has no children this will be empty
 	UFUNCTION(BlueprintCallable)
 		FGridObjectTree GetObjectTree();
