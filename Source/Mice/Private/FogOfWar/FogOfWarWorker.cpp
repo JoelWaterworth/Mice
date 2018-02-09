@@ -117,7 +117,7 @@ void AFogOfWarWorker::UpdateFowTexture() {
 							FVector currentWorldSpacePos = FVector(
 								((x - (int)halfTextureSize)) * dividend,
 								((y - (int)halfTextureSize)) * dividend,
-								position.Z);
+								eyeHeight.Z);
 							FVector currentPos = FVector(
 								(WorldGrid->minX + x) * 100.0f,
 								(WorldGrid->minY + y) * 100.0f,
@@ -132,8 +132,8 @@ void AFogOfWarWorker::UpdateFowTexture() {
 							//However, the tracing doesn't seem like it takes much time at all (~0.02ms with four actors tracing circles of 18 texels each),
 							//it's the blurring that chews CPU..
 							if (!currentlyInSight.Contains(FVector2D(x, y))) {
-								if (!Manager->GetWorld()->LineTraceTestByChannel(eyeHeight, currentWorldSpacePos, ECC_WorldStatic, queryParams)) {
-								//if (WorldGrid->CalculateProbabilityOfShot(eyeHeight, currentPos, unit) > 0.0f) {
+								//if (!Manager->GetWorld()->LineTraceTestByChannel(eyeHeight, currentWorldSpacePos, ECC_WorldStatic, queryParams)) {
+								if (unit->CalculateProbabilityOfShot(eyeHeight, currentWorldSpacePos) > 0.0f) {
 									//Is the actor able to affect the terra incognita
 
 									if (isWriteTerraIncog) {

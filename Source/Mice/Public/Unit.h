@@ -76,6 +76,8 @@ protected:
 	USceneComponent* root;
 
 public:
+	UFUNCTION(BlueprintCallable)
+		float CalculateProbabilityOfShot(FVector start, FVector end);
 
 	UFUNCTION(server, reliable, WithValidation, BlueprintCallable)
 		void UpdatePos(FIntVector n_pos);

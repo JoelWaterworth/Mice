@@ -44,3 +44,29 @@ bool AUnit::UpdatePos_Validate(FIntVector n_pos)
 {
 	return true;
 }
+
+float AUnit::CalculateProbabilityOfShot(FVector start, FVector end)
+{
+	if (weapon.projectProbArc) {
+		FVector dir = (end - start) / 100.0f;
+		float f = weapon.projectProbArc->GetFloatValue(dir.Size());
+		if (f <= 0.0f) {
+			return 0.0f;
+		}
+		FCollisionQueryParams queryParams(FName(TEXT("FOW trace")), false, this);
+		TArray<FHitResult> results;
+		if (!GetWorld()->LineTraceMultiByChannel(results, start, end, ECC_WorldStatic, queryParams)) {
+			return f;
+		}
+		else {
+			if (results[0].Distance >= dir.Size()) {
+				return f;
+			}
+			return 0.0f;
+		}
+	}
+	else {
+		return 0.0f;
+	}
+	return 0.0f;
+}

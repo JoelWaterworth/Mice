@@ -79,7 +79,9 @@ void AFogOfWarManager::Tick(float DeltaSeconds) {
 void AFogOfWarManager::StartFOWTextureUpdate() {
 	if (!FOWTexture) {
 		FOWTexture = UTexture2D::CreateTransient(TextureSize, TextureSize);
+		FOWTexture->Filter = TextureFilter::TF_Nearest;
 		LastFOWTexture = UTexture2D::CreateTransient(TextureSize, TextureSize);
+		LastFOWTexture->Filter = TextureFilter::TF_Nearest;
 		int arraySize = TextureSize * TextureSize;
 		TextureData.Init(FColor(0, 0, 0, 255), arraySize);
 		LastFrameTextureData.Init(FColor(0, 0, 0, 255), arraySize);
