@@ -149,6 +149,8 @@ protected:
 	UPROPERTY()
 		TArray<AGridObject*> GridObjects;
 
+	void AddBlockingTiles(FGridTransform GridOrigin);
+
 private:
 	static void SetDeltaNStep(int32& delta, int32& step);
 

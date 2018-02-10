@@ -278,41 +278,10 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 		// Access the subclass instance with the * or -> operators.
 		AGridObject* object = *ActorItr;
 		trans.Add(object->GridOrigin);
-		for (FIntVector& pos : object->GridOrigin.BlockedTiles) {
-			FIntVector loc = pos + object->GridOrigin.Origin;
-			if (object->GridOrigin.isBorder) {
-				auto boarder = [](FIntVector loc, EDirection dir, EDirection righthand,TMap<FBoarderKey, FObstucle>& WallObstucles, AGridObject* object) {
-					WallObstucles.Add(FBoarderKey(dir, loc),
-						FObstucle(object->GridOrigin.blockPercentage));
-					if (object->GridOrigin.isRightHandCorner) {
-						WallObstucles.Add(FBoarderKey(righthand, loc),
-							FObstucle(object->GridOrigin.blockPercentage));
-					};
-				};
-				switch (object->GridOrigin.Direction) {
-					case EDirection::D_Forward :
-						boarder(loc, EDirection::D_Forward, EDirection::D_Rightward, WallObstucles, object);
-						break;
-					case EDirection::D_Rightward:
-						boarder(loc, EDirection::D_Rightward, EDirection::D_Backward, WallObstucles, object);
-						break;
-					case EDirection::D_Backward:
-						boarder(loc, EDirection::D_Backward, EDirection::D_Leftward, WallObstucles, object);
-						break;
-					case EDirection::D_Leftward:
-						boarder(loc, EDirection::D_Leftward, EDirection::D_Forward, WallObstucles, object);
-						break;
-				default:
-					WallObstucles.Add(FBoarderKey(object->GridOrigin.Direction, loc),
-						FObstucle(object->GridOrigin.blockPercentage));
-					break;
-				}
-			}
-			else
-			{
-				obstucles.Add(loc,
-					FObstucle(object->GridOrigin.blockPercentage));
-			}
+		AddBlockingTiles(object->GridOrigin);
+		for (FGridTransform& GridOrigin : object->GridChildren) {
+			trans.Add(GridOrigin);
+			AddBlockingTiles(GridOrigin);
 		}
 	}
 
@@ -471,6 +440,46 @@ TArray<FIntVector> AWorldGrid::GetNeighbours(FIntVector origin) {
 		}
 	}
 	return neighbours;
+}
+
+void AWorldGrid::AddBlockingTiles(FGridTransform GridOrigin)
+{
+	for (FIntVector& pos : GridOrigin.BlockedTiles) {
+		FIntVector loc = pos + GridOrigin.Origin;
+		if (GridOrigin.isBorder) {
+			auto boarder = [](FIntVector loc, EDirection dir, EDirection righthand, TMap<FBoarderKey, FObstucle>& WallObstucles, FGridTransform GridOrigin) {
+				WallObstucles.Add(FBoarderKey(dir, loc),
+					FObstucle(GridOrigin.blockPercentage));
+				if (GridOrigin.isRightHandCorner) {
+					WallObstucles.Add(FBoarderKey(righthand, loc),
+						FObstucle(GridOrigin.blockPercentage));
+				};
+			};
+			switch (GridOrigin.Direction) {
+			case EDirection::D_Forward:
+				boarder(loc, EDirection::D_Forward, EDirection::D_Rightward, WallObstucles, GridOrigin);
+				break;
+			case EDirection::D_Rightward:
+				boarder(loc, EDirection::D_Rightward, EDirection::D_Backward, WallObstucles, GridOrigin);
+				break;
+			case EDirection::D_Backward:
+				boarder(loc, EDirection::D_Backward, EDirection::D_Leftward, WallObstucles, GridOrigin);
+				break;
+			case EDirection::D_Leftward:
+				boarder(loc, EDirection::D_Leftward, EDirection::D_Forward, WallObstucles, GridOrigin);
+				break;
+			default:
+				WallObstucles.Add(FBoarderKey(GridOrigin.Direction, loc),
+					FObstucle(GridOrigin.blockPercentage));
+				break;
+			}
+		}
+		else
+		{
+			obstucles.Add(loc,
+				FObstucle(GridOrigin.blockPercentage));
+		}
+	}
 }
 
 void AWorldGrid::SetDeltaNStep(int32 & delta, int32 & step)
