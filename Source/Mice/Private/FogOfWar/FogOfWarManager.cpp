@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Mice.h"
 #include "FogOfWarManager.h"
+#include "Mice.h"
 #include "RegisterToFOW.h"
 
 // Sets default values
