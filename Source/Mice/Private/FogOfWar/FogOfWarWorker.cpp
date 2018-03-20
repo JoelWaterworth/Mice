@@ -70,7 +70,7 @@ void AFogOfWarWorker::UpdateFowTexture() {
 		//Find actor position
 		if (!unit) return;
 		FVector position = unit->GetActorLocation();
-		FVector eyeHeight = unit->GetActorLocation() + FVector(0.0f, 0.0f, unit->height);
+		FVector eyeHeight = position;// +FVector(0.0f, 0.0f, unit->height);
 
 		//We divide by 100.0 because 1 texel equals 1 meter of visibility-data.
 		int posX = (int)(position.X / dividend) + halfTextureSize;
