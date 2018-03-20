@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "MPlayerState.h"
 #include "Classes/Sound/SoundCue.h"
-#include "GameFramework/Actor.h"
+#include "GameFramework/Character.h"
 #include "Unit.generated.h"
 
 USTRUCT(BlueprintType)
@@ -46,7 +46,7 @@ class UMCommand;
 class AMPlayerController;
 
 UCLASS(BlueprintType, Blueprintable)
-class MICE_API AUnit : public AActor
+class MICE_API AUnit : public ACharacter
 {
 	GENERATED_BODY()
 	
