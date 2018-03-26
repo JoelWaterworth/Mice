@@ -55,11 +55,11 @@ float AUnit::CalculateProbabilityOfShot(FVector start, FVector end)
 		}
 		FCollisionQueryParams queryParams(FName(TEXT("FOW trace")), false, this);
 		TArray<FHitResult> results;
-		if (!GetWorld()->LineTraceMultiByChannel(results, start, end, ECC_WorldStatic, queryParams)) {
+		if (!GetWorld()->LineTraceMultiByChannel(results, start, end, ECC_GameTraceChannel3, queryParams)) {
 			return f;
 		}
 		else {
-			if (results[0].Distance >= dir.Size()) {
+			if (results[0].Distance >= (start - end).Size()) {
 				return f;
 			}
 			return 0.0f;
