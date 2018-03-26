@@ -197,7 +197,7 @@ TMap<FIntVector, FIntVector> AWorldGrid::CalculatePaths(AUnit * Unit, int32 Limi
 					}
 				}
 				else {
-					UE_LOG(LogTemp, Warning, TEXT("failed to find %d: %d"), current.X, current.Y);
+					UE_LOG(LogTemp, Log, TEXT("failed to find %d: %d"), current.X, current.Y);
 				}
 			}
 		}
@@ -289,16 +289,16 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 	{
 		for (FIntVector& pos : tran.WalkablePosistions)
 		{
-			if (pos.X < minX) {
-				minX = pos.X;
+			FIntVector loc = pos + tran.Origin;
+			if (loc.X < minX) {
+				minX = loc.X;
 			}
-			if (pos.Y < minY) {
-				minY = pos.Y;
+			if (loc.Y < minY) {
+				minY = loc.Y;
 			}
-			bool bInObstucle = obstucles.Contains(pos);
-			bool bInBlockingVolume = checkBlockingVolume(pos, GridBlockingVolumes);
+			bool bInObstucle = obstucles.Contains(loc);
+			bool bInBlockingVolume = checkBlockingVolume(loc, GridBlockingVolumes);
 			if (!(bInObstucle || bInBlockingVolume)) {
-				FIntVector loc = pos + tran.Origin;
 				int32 x = loc.X, y = loc.Y, z = loc.Z;
 				FVector vec = FVector((float)(x * spacing), (float)(y * spacing), (float)(z * spacing)) + FVector(spacing / 2, spacing / 2, 0.0f);
 				/*
@@ -315,6 +315,9 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 				}
 				*/
 				gridTiles.Add(FIntVector(x, y, z), FGridTile());
+			}
+			else {
+				UE_LOG(LogWorld, Verbose, TEXT("postition %sis blocked"), *pos.ToString());
 			}
 		}
 	}
