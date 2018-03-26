@@ -197,7 +197,7 @@ TMap<FIntVector, FIntVector> AWorldGrid::CalculatePaths(AUnit * Unit, int32 Limi
 					}
 				}
 				else {
-					UE_LOG(LogTemp, Log, TEXT("failed to find %d: %d"), current.X, current.Y);
+					UE_LOG(LogTemp, Verbose, TEXT("failed to find %d: %d"), current.X, current.Y);
 				}
 			}
 		}
