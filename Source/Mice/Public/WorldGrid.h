@@ -138,7 +138,8 @@ protected:
 
 	void DebugPath(TMap<FIntVector, float> gScore);
 
-	TArray<FIntVector> GetNeighbours(FIntVector origin);
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	TArray<FIntVector> GetNeighbours(FIntVector origin, bool bReturnObstucles = false);
 
 	UPROPERTY(VisibleAnywhere)
 		TMap<FIntVector, FObstucle> obstucles;
@@ -162,6 +163,18 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void GetSpawnPoints();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+		static TArray<EDirection> directionFromIntVector(FIntVector dir);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+		static FIntVector directionToVector(EDirection dir);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+		static EDirection addDirection(EDirection a, EDirection b);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+		static EDirection oppersiteDirection(EDirection dir);
 
 	//The Transform is of the centre of the tile
 	UFUNCTION(BlueprintCallable, BlueprintPure)

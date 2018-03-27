@@ -153,6 +153,65 @@ void AWorldGrid::GetSpawnPoints() {
 	}
 }
 
+TArray<EDirection> AWorldGrid::directionFromIntVector(FIntVector dir)
+{
+	auto plah = [](int32 x, EDirection posDir, EDirection negDir, TArray<EDirection>& dirs) {
+		if (x > 0) {
+			dirs.Add(posDir);
+		}
+		else if (x < 0) {
+			dirs.Add(negDir);
+		}
+	};
+	TArray<EDirection> dirs = TArray<EDirection>();
+	plah(dir.Y, EDirection::D_Backward, EDirection::D_Forward, dirs);
+	plah(dir.X, EDirection::D_Rightward, EDirection::D_Leftward, dirs);
+	plah(dir.Z, EDirection::D_Upward, EDirection::D_Downward, dirs);
+	return dirs;
+}
+
+FIntVector AWorldGrid::directionToVector(EDirection dir)
+{
+	switch (dir) {
+	case EDirection::D_Forward:
+		return FIntVector(0, -1, 0);
+	case EDirection::D_Backward:
+		return FIntVector(0, 1, 0);
+	case EDirection::D_Rightward:
+		return FIntVector(1, 0, 0);
+	case EDirection::D_Leftward:
+		return FIntVector(-1, 0, 0);
+	}
+	return FIntVector(0, -1, 0);
+}
+
+EDirection AWorldGrid::addDirection(EDirection a, EDirection b)
+{
+	uint8 c = (uint8)a + (uint8)b;
+	c = c % 4;
+	return (EDirection)c;
+}
+
+EDirection AWorldGrid::oppersiteDirection(EDirection dir)
+{
+	switch (dir) {
+	case EDirection::D_Forward:
+		return EDirection::D_Backward;
+	case EDirection::D_Backward:
+		return EDirection::D_Forward;
+	case EDirection::D_Rightward:
+		return EDirection::D_Leftward;
+	case EDirection::D_Leftward:
+		return EDirection::D_Rightward;
+	case EDirection::D_Upward:
+		return EDirection::D_Downward;
+	case EDirection::D_Downward:
+		return EDirection::D_Upward;
+	default:
+		return EDirection::D_Forward;
+	}
+}
+
 TMap<FIntVector, FIntVector> AWorldGrid::CalculatePaths(AUnit * Unit, int32 Limit)
 {
 	TArray<FIntVector> OpenSet = TArray<FIntVector>();
@@ -280,8 +339,17 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 		trans.Add(object->GridOrigin);
 		AddBlockingTiles(object->GridOrigin);
 		for (FGridTransform& GridOrigin : object->GridChildren) {
-			trans.Add(GridOrigin);
-			AddBlockingTiles(GridOrigin);
+			FGridTransform go = GridOrigin;
+			UE_LOG(LogWorld, Log, TEXT("starting postition %s"), *go.Origin.ToString());
+			auto rot = FVector(directionToVector(object->GridOrigin.Direction) * -1).Rotation() + FRotator(0.0f, -90.0f, 0.0f);
+			UE_LOG(LogWorld, Log, TEXT("rotation %s"), *rot.ToString());
+			go.Origin = FIntVector(rot.RotateVector(FVector(go.Origin)));
+			UE_LOG(LogWorld, Log, TEXT("relative postition %s, direction %s"), *go.Origin.ToString(), *directionToVector(object->GridOrigin.Direction).ToString());
+			go.Origin = go.Origin + object->GridOrigin.Origin;
+			UE_LOG(LogWorld, Log, TEXT("end postition %s"), *go.Origin.ToString());
+			go.Direction = addDirection(go.Direction, object->GridOrigin.Direction);
+			trans.Add(go);
+			AddBlockingTiles(go);
 		}
 	}
 
@@ -364,21 +432,9 @@ void AWorldGrid::DebugPath(TMap<FIntVector, float> gScore)
 	}*/
 }
 
-TArray<FIntVector> AWorldGrid::GetNeighbours(FIntVector origin) {
-	auto direction = [](FIntVector pos) -> TArray<EDirection> {
-		auto plah = [](int32 x, EDirection posDir, EDirection negDir, TArray<EDirection>& dirs) {
-			if (x > 0) {
-				dirs.Add(posDir);
-			} else if (x < 0) {
-				dirs.Add(negDir);
-			}
-		};
-		TArray<EDirection> dirs = TArray<EDirection>();
-		plah(pos.Y, EDirection::D_Forward, EDirection::D_Forward, dirs);
-		plah(pos.X, EDirection::D_Rightward, EDirection::D_Leftward, dirs);
-		plah(pos.Z, EDirection::D_Upward, EDirection::D_Downward, dirs);
-		return dirs;
-	};
+TArray<FIntVector> AWorldGrid::GetNeighbours(FIntVector origin, bool bReturnObstucles) {
+	TArray<FIntVector> neighbours = TArray<FIntVector>();
+	TArray<FIntVector> obstrucles = TArray<FIntVector>();
 
 	auto opposite = [](EDirection dir) -> EDirection {
 		switch (dir) {
@@ -402,9 +458,9 @@ TArray<FIntVector> AWorldGrid::GetNeighbours(FIntVector origin) {
 	auto addDir = [](EDirection dir, FIntVector pos) -> FIntVector {
 		switch (dir) {
 		case EDirection::D_Forward:
-			return pos + FIntVector(0,1,0);
+			return pos + FIntVector(0,-1,0);
 		case EDirection::D_Backward:
-			return pos + FIntVector(0, -1, 0);
+			return pos + FIntVector(0, 1, 0);
 		case EDirection::D_Rightward:
 			return pos + FIntVector(1, 0, 0);
 		case EDirection::D_Leftward:
@@ -414,35 +470,48 @@ TArray<FIntVector> AWorldGrid::GetNeighbours(FIntVector origin) {
 		}
 	};
 
-	TArray<FIntVector> neighbours = TArray<FIntVector>();
-
 	for (int32 x = -1; x < 2; x++) {
 		for (int32 y = -1; y < 2; y++) {
 			for (int32 z = -1; z < 2; z++) {
 				if (!(x == 0 && y == 0)) {
 					FIntVector dir = FIntVector(x, y, z);
-					TArray<EDirection> odirs = direction(dir);
+					TArray<EDirection> odirs = directionFromIntVector(dir);
 					FIntVector pos = dir + origin;
 					if (gridTiles.Contains(pos)) {
 						bool con = true;
-						auto odirs = direction(dir);
+						auto odirs = directionFromIntVector(dir);
 						for (EDirection& odir: odirs) {
-							con = WallObstucles.Contains(FBoarderKey(odir, origin)) ? false : con;
-							con = WallObstucles.Contains(FBoarderKey(opposite(odir), addDir(odir, origin))) ? false : con;
+							if (WallObstucles.Contains(FBoarderKey(odir, origin))) {
+								obstrucles.Add(origin);
+								con = false;
+							}
+							if (WallObstucles.Contains(FBoarderKey(opposite(odir), addDir(odir, origin)))) {
+								obstrucles.Add(addDir(odir, origin));
+								con = false;
+							}
 							auto s = obstucles.Find(addDir(odir, origin));
 							if (s) {
 								con = s->isUpToEdge ? false : con;
+								obstrucles.Add(origin);
 							}
 						}
 						if (con) {
 							neighbours.Add(pos);
 						}
 					}
+					else if (obstucles.Find(pos)) {
+						obstrucles.Add(pos);
+					}
 				}
 			}
 		}
 	}
-	return neighbours;
+	if (bReturnObstucles) {
+		return obstrucles;
+	}
+	else {
+		return neighbours;
+	}
 }
 
 void AWorldGrid::AddBlockingTiles(FGridTransform GridOrigin)
