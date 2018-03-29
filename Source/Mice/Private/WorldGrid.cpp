@@ -407,6 +407,8 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 		}
 	}
 
+	GetSpawnPoints();
+
 	Refresh = false;
 	//Register all the components
 	RegisterAllComponents();

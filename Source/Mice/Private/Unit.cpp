@@ -45,7 +45,7 @@ bool AUnit::UpdatePos_Validate(FIntVector n_pos)
 	return true;
 }
 
-float AUnit::CalculateProbabilityOfShot(FVector start, FVector end)
+float AUnit::CalculateProbabilityOfShot(FVector start, FVector end, bool bDebug)
 {
 	if (weapon.projectProbArc) {
 		FVector dir = (end - start) / 100.0f;
@@ -54,6 +54,13 @@ float AUnit::CalculateProbabilityOfShot(FVector start, FVector end)
 			return 0.0f;
 		}
 		FCollisionQueryParams queryParams(FName(TEXT("FOW trace")), false, this);
+		if (bDebug)
+		{
+			const FName TraceTag("TraceWeaponParams");
+			GetWorld()->DebugDrawTraceTag = TraceTag;
+
+			queryParams.TraceTag = TraceTag;
+		}
 		TArray<FHitResult> results;
 		if (!GetWorld()->LineTraceMultiByChannel(results, start, end, ECC_GameTraceChannel3, queryParams)) {
 			return f;

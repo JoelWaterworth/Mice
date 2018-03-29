@@ -77,7 +77,7 @@ protected:
 
 public:
 	UFUNCTION(BlueprintCallable)
-		float CalculateProbabilityOfShot(FVector start, FVector end);
+		float CalculateProbabilityOfShot(FVector start, FVector end, bool bDebug = false);
 
 	UFUNCTION(server, reliable, WithValidation, BlueprintCallable)
 		void UpdatePos(FIntVector n_pos);
