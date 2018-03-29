@@ -200,4 +200,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		TMap<FBoarderKey, FObstucle> GetWallObstucles() const { return WallObstucles; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+		bool isObstuclePresent(FIntVector pos, EDirection dir);
 };

@@ -285,6 +285,23 @@ TArray<FIntVector> AWorldGrid::CreatePathFromRoutes(TMap<FIntVector, FIntVector>
 	return path;
 }
 
+bool AWorldGrid::isObstuclePresent(FIntVector pos, EDirection dir)
+{
+	FObstucle* obs = obstucles.Find(pos);
+	if (obs) {
+		return true;
+	}
+	obs = WallObstucles.Find(FBoarderKey(dir, pos));
+	if (obs) {
+		return true;
+	}
+	obs = WallObstucles.Find(FBoarderKey(dir, directionToVector(dir) + pos));
+	if (obs) {
+		return true;
+	}
+	return false;
+}
+
 void AWorldGrid::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
@@ -485,7 +502,7 @@ TArray<FIntVector> AWorldGrid::GetNeighbours(FIntVector origin, bool bReturnObst
 								obstrucles.Add(origin);
 								con = false;
 							}
-							if (WallObstucles.Contains(FBoarderKey(opposite(odir), addDir(odir, origin)))) {
+							if (WallObstucles.Contains(FBoarderKey(oppersiteDirection(odir), addDir(odir, origin)))) {
 								obstrucles.Add(addDir(odir, origin));
 								con = false;
 							}
