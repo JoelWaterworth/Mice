@@ -18,6 +18,4 @@ class MICE_API AMPlayerStart : public APlayerStart
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Team")
 		ETeam team;
-	
-	bool inUse = false;
 };

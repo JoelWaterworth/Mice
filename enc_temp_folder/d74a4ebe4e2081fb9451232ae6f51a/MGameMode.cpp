@@ -24,9 +24,8 @@ void AMGameMode::PostLogin(APlayerController * NewPlayer)
 {
 	// Place player on a team before Super (VoIP team based init, findplayerstart, etc)
 	AMPlayerState* NewPlayerState = Cast<AMPlayerState>(NewPlayer->PlayerState);
-	ETeam team = ChooseTeam();
-	UE_LOG(LogTemp, Warning, TEXT("PlayerArray %d"), (int)team);
-//	NewPlayerState->SetTeam(team);
+	const ETeam TeamNum = ChooseTeam();
+	NewPlayerState->SetTeam(TeamNum);
 	Super::PostLogin(NewPlayer);
 }
 
@@ -75,7 +74,7 @@ void AMGameMode::BeginPlay()
 ETeam AMGameMode::ChooseTeam()
 {
 	int32 count = GameState->PlayerArray.Num();
-	if (count % 2 == 1) {
+	if (count % 2) {
 		return ETeam::T_Blue;
 	}
 	else {
@@ -93,14 +92,11 @@ AActor * AMGameMode::ChoosePlayerStart_Implementation(AController * Player)
 		for (TActorIterator<AMPlayerStart> playerStart(World); playerStart; ++playerStart)
 		{
 			AMPlayerStart* start = *playerStart;
-			if (!start->inUse)
+			if (playerState->team == start->team)
 			{
-				playerState->SetTeam(start->team);
-				start->inUse = true;
 				return start;
 			}
 		}
 	}
 	return nullptr;
-
 }
