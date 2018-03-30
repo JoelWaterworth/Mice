@@ -26,7 +26,7 @@ struct FGridTransform
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FIntVector Origin;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		EDirection Direction;
+		FIntVector Direction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		TArray<FIntVector> WalkablePosistions;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -45,7 +45,7 @@ public:
 	FGridTransform(
 		FIntVector origin = FIntVector(0),
 		TArray<FIntVector> walkablePosistions = TArray<FIntVector>(),
-		EDirection direction = EDirection::D_Forward,
+		FIntVector direction = FIntVector(0, 1, 0),
 		TArray<FIntVector> blockedTiles = TArray<FIntVector>(),
 		int bp = 100,
 		bool border = false,

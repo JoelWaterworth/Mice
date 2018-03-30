@@ -75,7 +75,7 @@ FTransform AWorldGrid::VectorToWorldTransform(FIntVector pos)
 {
 	return VectorToLocalTransform(pos) * GetActorTransform();
 }
-
+/*
 float AWorldGrid::CalculateProbabilityOfShot(FVector start, FVector end, AUnit* unit)
 {
 	FIntVector endTile = FIntVector(end / 100.0f);
@@ -116,7 +116,7 @@ float AWorldGrid::CalculateProbabilityOfShot(FVector start, FVector end, AUnit* 
 	}
 	return 0.0f;
 }
-
+*/
 FTransform AWorldGrid::VectorToLocalTransform(FIntVector pos)
 {
 	FIntVector nPos = (pos * spacing) + FIntVector(spacing /2, spacing / 2, 0);
@@ -153,20 +153,18 @@ void AWorldGrid::GetSpawnPoints() {
 	}
 }
 
-TArray<EDirection> AWorldGrid::directionFromIntVector(FIntVector dir)
+TArray<FIntVector> AWorldGrid::directionFromIntVector(FIntVector dir)
 {
-	auto plah = [](int32 x, EDirection posDir, EDirection negDir, TArray<EDirection>& dirs) {
-		if (x > 0) {
-			dirs.Add(posDir);
-		}
-		else if (x < 0) {
-			dirs.Add(negDir);
-		}
-	};
-	TArray<EDirection> dirs = TArray<EDirection>();
-	plah(dir.Y, EDirection::D_Forward, EDirection::D_Backward, dirs);
-	plah(dir.X, EDirection::D_Leftward, EDirection::D_Rightward, dirs);
-	plah(dir.Z, EDirection::D_Upward, EDirection::D_Downward, dirs);
+	TArray<FIntVector> dirs;
+	if (dir.X != 0) {
+		dirs.Push(FIntVector(dir.X, 0, 0));
+	}
+	if (dir.Y != 0) {
+		dirs.Push(FIntVector(0, dir.Y, 0));
+	}
+	if (dir.Z != 0) {
+		dirs.Push(FIntVector(0, 0, dir.Z));
+	}
 	return dirs;
 }
 
@@ -285,7 +283,7 @@ TArray<FIntVector> AWorldGrid::CreatePathFromRoutes(TMap<FIntVector, FIntVector>
 	Algo::Reverse(path);
 	return path;
 }
-
+/*
 bool AWorldGrid::isObstuclePresent(FIntVector pos, EDirection dir)
 {
 	FObstucle* obs = obstucles.Find(pos);
@@ -302,7 +300,7 @@ bool AWorldGrid::isObstuclePresent(FIntVector pos, EDirection dir)
 	}
 	return false;
 }
-
+*/
 void AWorldGrid::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
@@ -359,16 +357,18 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 		for (FGridTransform& GridOrigin : object->GridChildren) {
 			FGridTransform go = GridOrigin;
 			UE_LOG(LogWorld, Log, TEXT("starting postition %s"), *go.Origin.ToString());
-			auto rot = FVector(directionToVector(object->GridOrigin.Direction) * -1).Rotation() + FRotator(0.0f, 0.0f, 0.0f);
+			auto rot = FVector(object->GridOrigin.Direction * -1).Rotation() + FRotator(0.0f, 90.0f, 0.0f);
 			UE_LOG(LogWorld, Log, TEXT("rotation %s"), *rot.ToString());
 			FVector fvec = rot.RotateVector(FVector(go.Origin));
 			
 			UE_LOG(LogWorld, Log, TEXT("FVector =  %s"), *fvec.ToString());
 			go.Origin = FIntVector(FMath::RoundToInt(fvec.X), FMath::RoundToInt(fvec.Y), FMath::RoundToInt(fvec.Z));
-			UE_LOG(LogWorld, Log, TEXT("relative postition %s, direction %s"), *go.Origin.ToString(), *directionToVector(object->GridOrigin.Direction).ToString());
+			UE_LOG(LogWorld, Log, TEXT("relative postition %s, direction %s"), *go.Origin.ToString(), *object->GridOrigin.Direction.ToString());
 			go.Origin = go.Origin + object->GridOrigin.Origin;
 			UE_LOG(LogWorld, Log, TEXT("end postition %s"), *go.Origin.ToString());
-			go.Direction = addDirection(go.Direction, object->GridOrigin.Direction);
+			rot = FVector(object->GridOrigin.Direction * -1).Rotation() + FRotator(0.0f, 90.0f, 0.0f);
+			FVector fdvec = rot.RotateVector(FVector(go.Direction));
+			go.Direction = FIntVector(FMath::RoundToInt(fdvec.X), FMath::RoundToInt(fdvec.Y), FMath::RoundToInt(fdvec.Z));
 			trans.Add(go);
 			AddBlockingTiles(go);
 		}
@@ -459,84 +459,50 @@ TArray<FIntVector> AWorldGrid::GetNeighbours(FIntVector origin, bool bReturnObst
 	TArray<FIntVector> neighbours = TArray<FIntVector>();
 	TArray<FIntVector> obstrucles = TArray<FIntVector>();
 
-	auto opposite = [](EDirection dir) -> EDirection {
-		switch (dir) {
-		case EDirection::D_Forward:
-			return EDirection::D_Backward;
-		case EDirection::D_Backward:
-			return EDirection::D_Forward;
-		case EDirection::D_Rightward:
-			return EDirection::D_Leftward;
-		case EDirection::D_Leftward:
-			return EDirection::D_Rightward;
-		case EDirection::D_Upward:
-			return EDirection::D_Downward;
-		case EDirection::D_Downward:
-			return EDirection::D_Upward;
-		default:
-			return EDirection::D_Forward;
-		}
-	};
-
-	auto addDir = [](EDirection dir, FIntVector pos) -> FIntVector {
-		switch (dir) {
-		case EDirection::D_Forward:
-			return pos + FIntVector( 0, 1, 0);
-		case EDirection::D_Backward:
-			return pos + FIntVector( 0,-1, 0);
-		case EDirection::D_Rightward:
-			return pos + FIntVector(-1, 0, 0);
-		case EDirection::D_Leftward:
-			return pos + FIntVector( 1, 0, 0);
-		default:
-			return pos;
-		}
-	};
-
-	for (int32 z = -1; z < 2; z++) {
-		for (int32 y = -1; y < 2; y++) {
-			for (int32 x = -1; x < 2; x++) {
-				if (!(x == 0 && y == 0)) {
-					FIntVector dir = FIntVector(x, y, z);
-					TArray<EDirection> odirs = directionFromIntVector(dir);
-					FIntVector pos = dir + origin;
-					if (gridTiles.Contains(pos) && dir != FIntVector(0,0,0)) {
-						bool con = true;
-						for (int32 i = 0; i < odirs.Num(); i++) {
-							EDirection odir = odirs[i];
-							auto s = obstucles.Find(pos);
-							if (s) {
-								con = s->isUpToEdge ? false : con;
-								obstrucles.Add(pos);
-							}
-							FBoarderKey key = FBoarderKey(odir, pos);
-							if (WallObstucles.Contains(key)) {
-								obstrucles.Add(pos);
-								con = false;
-							}
-							else {
-								UE_LOG(LogWorld, Warning, TEXT("dir=%s, postition=%s"), *dir.ToString(),*key.origin.ToString());
-							}
-							FBoarderKey okey = FBoarderKey(oppersiteDirection(odir), origin);
-							if (WallObstucles.Contains(okey)) {
-								obstrucles.Add(origin);
-								con = false;
-							}
-							else {
-								UE_LOG(LogWorld, Warning, TEXT("dir=%s, postition=%s"), *dir.ToString(), *okey.origin.ToString());
-							}
-						}
-						if (con) {
-							neighbours.Add(pos);
-						}
-					}
-					else if (obstucles.Find(pos)) {
+	//for (int32 z = -1; z < 2; z++) {
+	for (int32 y = -1; y < 2; y++) {
+		for (int32 x = -1; x < 2; x++) {
+			if (!(x == 0 && y == 0)) {
+				FIntVector dir = FIntVector(x, y, origin.Z);
+				TArray<FIntVector> odirs = directionFromIntVector(dir);
+				FIntVector pos = dir + origin;
+				if (gridTiles.Contains(pos) && dir != FIntVector(0,0,0)) {
+					bool con = true;
+					auto s = obstucles.Find(pos);
+					if (s) {
+						con = s->isUpToEdge ? false : con;
 						obstrucles.Add(pos);
 					}
+					for (int32 i = 0; i < odirs.Num(); i++) {
+						FIntVector odir = odirs[i];
+						FBoarderKey key = FBoarderKey(odir, pos);
+						if (WallObstucles.Contains(key)) {
+							obstrucles.Add(pos);
+							con = false;
+						}
+						else {
+							UE_LOG(LogWorld, Warning, TEXT("dir=%s, postition=%s"), *odir.ToString(),*key.origin.ToString());
+						}
+						FBoarderKey okey = FBoarderKey(odir * -1, origin);
+						if (WallObstucles.Contains(okey)) {
+							obstrucles.Add(origin);
+							con = false;
+						}
+						else {
+							UE_LOG(LogWorld, Warning, TEXT("dir=%s, postition=%s"), *odir.ToString(), *okey.origin.ToString());
+						}
+					}
+					if (con) {
+						neighbours.Add(pos);
+					}
+				}
+				else if (obstucles.Find(pos)) {
+					obstrucles.Add(pos);
 				}
 			}
 		}
 	}
+	//}
 	if (bReturnObstucles) {
 		return obstrucles;
 	}
@@ -550,32 +516,17 @@ void AWorldGrid::AddBlockingTiles(FGridTransform GridOrigin)
 	for (FIntVector& pos : GridOrigin.BlockedTiles) {
 		FIntVector loc = pos + GridOrigin.Origin;
 		if (GridOrigin.isBorder) {
-			auto boarder = [](FIntVector loc, EDirection dir, EDirection righthand, TMap<FBoarderKey, FObstucle>& WallObstucles, FGridTransform GridOrigin) {
+			auto boarder = [](FIntVector loc, FIntVector dir, TMap<FBoarderKey, FObstucle>& WallObstucles, FGridTransform GridOrigin) {
 				WallObstucles.Add(FBoarderKey(dir, loc),
 					FObstucle(GridOrigin.blockPercentage));
 				if (GridOrigin.isRightHandCorner) {
+					FVector fvec = FRotator(0.0f, 0.0f, 0.0f).RotateVector(FVector(dir));
+					auto righthand = FIntVector(FMath::RoundToInt(fvec.X), FMath::RoundToInt(fvec.Y), FMath::RoundToInt(fvec.Z));
 					WallObstucles.Add(FBoarderKey(righthand, loc),
 						FObstucle(GridOrigin.blockPercentage));
 				};
 			};
-			switch (GridOrigin.Direction) {
-			case EDirection::D_Forward:
-				boarder(loc, EDirection::D_Forward, EDirection::D_Rightward, WallObstucles, GridOrigin);
-				break;
-			case EDirection::D_Rightward:
-				boarder(loc, EDirection::D_Rightward, EDirection::D_Backward, WallObstucles, GridOrigin);
-				break;
-			case EDirection::D_Backward:
-				boarder(loc, EDirection::D_Backward, EDirection::D_Leftward, WallObstucles, GridOrigin);
-				break;
-			case EDirection::D_Leftward:
-				boarder(loc, EDirection::D_Leftward, EDirection::D_Forward, WallObstucles, GridOrigin);
-				break;
-			default:
-				WallObstucles.Add(FBoarderKey(GridOrigin.Direction, loc),
-					FObstucle(GridOrigin.blockPercentage));
-				break;
-			}
+			boarder(loc, GridOrigin.Direction, WallObstucles, GridOrigin);
 		}
 		else
 		{

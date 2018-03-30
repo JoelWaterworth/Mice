@@ -71,25 +71,11 @@ void AGridObject::UpdatePosition()
 		*/
 		GridOrigin.Origin = pos;
 		int x = (float)((int)GetActorRotation().Yaw % 360);
-		int angle = (int)round((x < 0.0f ? x + 360.0f : x) / 90.f);
-		switch (angle)
-		{
-		case 0:
-			GridOrigin.Direction = EDirection::D_Forward;
-			break;
-		case 1:
-			GridOrigin.Direction = EDirection::D_Rightward;
-			break;
-		case 2:
-			GridOrigin.Direction = EDirection::D_Backward;
-			break;
-		case 3:
-			GridOrigin.Direction = EDirection::D_Leftward;
-			break;
-		default:
-			break;
-		}
-		SetActorRotation(FRotator(0.0f, (float)angle * 90.0f, 0.0f));
+		int angle = x / 90;
+		auto rot = FRotator(0.0f, (float)angle * 90.0f, 0.0f);
+		SetActorRotation(rot);
+		auto vec = rot.RotateVector(FVector(0.0f, 1.0f, 0.0f));
+		GridOrigin.Direction = FIntVector(FMath::RoundToInt(vec.X), FMath::RoundToInt(vec.Y), FMath::RoundToInt(vec.Z));
 
 		TArray<UActorComponent*> actors = TArray<UActorComponent*>();
 		GetComponents<UActorComponent>(actors);

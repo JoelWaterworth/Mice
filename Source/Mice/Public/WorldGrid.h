@@ -40,15 +40,15 @@ struct FBoarderKey {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		EDirection Direction;
+		FIntVector Direction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FIntVector origin;
 
 public:
 
 	FBoarderKey(
-		EDirection d = EDirection::D_Forward,
-		FIntVector o = FIntVector()) :
+		FIntVector d = FIntVector(0, 1, 0),
+		FIntVector o = FIntVector(0,0,0)) :
 		Direction(d),
 		origin(o) {}
 
@@ -175,7 +175,7 @@ public:
 	void GetSpawnPoints();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-		static TArray<EDirection> directionFromIntVector(FIntVector dir);
+		static TArray<FIntVector> directionFromIntVector(FIntVector dir);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 		static FIntVector directionToVector(EDirection dir);
@@ -190,8 +190,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 		FTransform VectorToWorldTransform(FIntVector pos);
 	//The Transform is of the centre of the tile
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-		float CalculateProbabilityOfShot(FVector start, FVector end, AUnit* unit);
+	//UFUNCTION(BlueprintCallable, BlueprintPure)
+	//	float CalculateProbabilityOfShot(FVector start, FVector end, AUnit* unit);
 	//The Transform is of the centre of the tile
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 		FTransform VectorToLocalTransform(FIntVector pos);
@@ -211,6 +211,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 		TMap<FBoarderKey, FObstucle> GetWallObstucles() const { return WallObstucles; }
 
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-		bool isObstuclePresent(FIntVector pos, EDirection dir);
+	//UFUNCTION(BlueprintCallable, BlueprintPure)
+	//	bool isObstuclePresent(FIntVector pos, EDirection dir);
 };
