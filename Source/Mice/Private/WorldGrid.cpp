@@ -283,24 +283,28 @@ TArray<FIntVector> AWorldGrid::CreatePathFromRoutes(TMap<FIntVector, FIntVector>
 	Algo::Reverse(path);
 	return path;
 }
-/*
-bool AWorldGrid::isObstuclePresent(FIntVector pos, EDirection dir)
+
+bool AWorldGrid::isObstuclePresent(FIntVector origin, FIntVector dir)
 {
-	FObstucle* obs = obstucles.Find(pos);
-	if (obs) {
-		return true;
-	}
-	obs = WallObstucles.Find(FBoarderKey(dir, pos));
-	if (obs) {
-		return true;
-	}
-	obs = WallObstucles.Find(FBoarderKey(dir, directionToVector(dir) + pos));
-	if (obs) {
-		return true;
+	TArray<FIntVector> odirs = directionFromIntVector(dir);
+	FIntVector pos = dir + origin;
+	if (gridTiles.Contains(pos) && dir != FIntVector(0, 0, 0)) {
+		if (obstucles.Contains(pos)) {
+			return true;
+		}
+		for (int32 i = 0; i < odirs.Num(); i++) {
+			FIntVector odir = odirs[i];
+			if (WallObstucles.Contains(FBoarderKey(odir, pos))) {
+				return true;
+			}
+			if (WallObstucles.Contains(FBoarderKey(odir * -1, origin))) {
+				return true;
+			}
+		}
 	}
 	return false;
 }
-*/
+
 void AWorldGrid::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
