@@ -70,9 +70,9 @@ void AGridObject::UpdatePosition()
 		}
 		*/
 		GridOrigin.Origin = pos;
-		float x = (float)((int)GetActorRotation().Yaw % 360);
-		float angle = x / 90.0f;
-		auto rot = FRotator(0.0f, FMath::RoundToFloat( angle) * 90.0f, 0.0f);
+		int x = (float)((int)GetActorRotation().Yaw % 360);
+		int angle = x / 90;
+		auto rot = FRotator(0.0f, (float)angle * 90.0f, 0.0f);
 		SetActorRotation(rot);
 		auto vec = rot.RotateVector(FVector(0.0f, 1.0f, 0.0f));
 		GridOrigin.Direction = FIntVector(FMath::RoundToInt(vec.X), FMath::RoundToInt(vec.Y), FMath::RoundToInt(vec.Z));

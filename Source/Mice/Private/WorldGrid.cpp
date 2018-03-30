@@ -356,16 +356,11 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 		AddBlockingTiles(object->GridOrigin);
 		for (FGridTransform& GridOrigin : object->GridChildren) {
 			FGridTransform go = GridOrigin;
-			UE_LOG(LogWorld, Log, TEXT("starting postition %s"), *go.Origin.ToString());
 			auto rot = FVector(object->GridOrigin.Direction * -1).Rotation() + FRotator(0.0f, 90.0f, 0.0f);
-			UE_LOG(LogWorld, Log, TEXT("rotation %s"), *rot.ToString());
 			FVector fvec = rot.RotateVector(FVector(go.Origin));
 			
-			UE_LOG(LogWorld, Log, TEXT("FVector =  %s"), *fvec.ToString());
 			go.Origin = FIntVector(FMath::RoundToInt(fvec.X), FMath::RoundToInt(fvec.Y), FMath::RoundToInt(fvec.Z));
-			UE_LOG(LogWorld, Log, TEXT("relative postition %s, direction %s"), *go.Origin.ToString(), *object->GridOrigin.Direction.ToString());
 			go.Origin = go.Origin + object->GridOrigin.Origin;
-			UE_LOG(LogWorld, Log, TEXT("end postition %s"), *go.Origin.ToString());
 			rot = FVector(object->GridOrigin.Direction * -1).Rotation() + FRotator(0.0f, 90.0f, 0.0f);
 			FVector fdvec = rot.RotateVector(FVector(go.Direction));
 			go.Direction = FIntVector(FMath::RoundToInt(fdvec.X), FMath::RoundToInt(fdvec.Y), FMath::RoundToInt(fdvec.Z));
