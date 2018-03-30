@@ -164,8 +164,8 @@ TArray<EDirection> AWorldGrid::directionFromIntVector(FIntVector dir)
 		}
 	};
 	TArray<EDirection> dirs = TArray<EDirection>();
-	plah(dir.Y, EDirection::D_Backward, EDirection::D_Forward, dirs);
-	plah(dir.X, EDirection::D_Rightward, EDirection::D_Leftward, dirs);
+	plah(dir.Y, EDirection::D_Forward, EDirection::D_Backward, dirs);
+	plah(dir.X, EDirection::D_Leftward, EDirection::D_Rightward, dirs);
 	plah(dir.Z, EDirection::D_Upward, EDirection::D_Downward, dirs);
 	return dirs;
 }
@@ -174,15 +174,16 @@ FIntVector AWorldGrid::directionToVector(EDirection dir)
 {
 	switch (dir) {
 	case EDirection::D_Forward:
-		return FIntVector(0, -1, 0);
+		FIntVector(0, 1, 0);
 	case EDirection::D_Backward:
-		return FIntVector(0, 1, 0);
+		FIntVector(0, -1, 0);
 	case EDirection::D_Rightward:
-		return FIntVector(1, 0, 0);
+		FIntVector(1, 0, 0);
 	case EDirection::D_Leftward:
-		return FIntVector(-1, 0, 0);
+		FIntVector(-1, 0, 0);
+	default:
+		return FIntVector(0, 0, 0);
 	}
-	return FIntVector(0, -1, 0);
 }
 
 EDirection AWorldGrid::addDirection(EDirection a, EDirection b)
@@ -358,7 +359,7 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 		for (FGridTransform& GridOrigin : object->GridChildren) {
 			FGridTransform go = GridOrigin;
 			UE_LOG(LogWorld, Log, TEXT("starting postition %s"), *go.Origin.ToString());
-			auto rot = FVector(directionToVector(object->GridOrigin.Direction) * -1).Rotation() + FRotator(0.0f, -90.0f, 0.0f);
+			auto rot = FVector(directionToVector(object->GridOrigin.Direction) * -1).Rotation() + FRotator(0.0f, 0.0f, 0.0f);
 			UE_LOG(LogWorld, Log, TEXT("rotation %s"), *rot.ToString());
 			FVector fvec = rot.RotateVector(FVector(go.Origin));
 			
@@ -480,41 +481,49 @@ TArray<FIntVector> AWorldGrid::GetNeighbours(FIntVector origin, bool bReturnObst
 	auto addDir = [](EDirection dir, FIntVector pos) -> FIntVector {
 		switch (dir) {
 		case EDirection::D_Forward:
-			return pos + FIntVector(0,-1,0);
+			return pos + FIntVector( 0, 1, 0);
 		case EDirection::D_Backward:
-			return pos + FIntVector(0, 1, 0);
+			return pos + FIntVector( 0,-1, 0);
 		case EDirection::D_Rightward:
-			return pos + FIntVector(1, 0, 0);
+			return pos + FIntVector(-1, 0, 0);
 		case EDirection::D_Leftward:
-			return pos + FIntVector(-1, 1, 0);
+			return pos + FIntVector( 1, 0, 0);
 		default:
 			return pos;
 		}
 	};
 
-	for (int32 x = -1; x < 2; x++) {
+	for (int32 z = -1; z < 2; z++) {
 		for (int32 y = -1; y < 2; y++) {
-			for (int32 z = -1; z < 2; z++) {
+			for (int32 x = -1; x < 2; x++) {
 				if (!(x == 0 && y == 0)) {
 					FIntVector dir = FIntVector(x, y, z);
 					TArray<EDirection> odirs = directionFromIntVector(dir);
 					FIntVector pos = dir + origin;
-					if (gridTiles.Contains(pos)) {
+					if (gridTiles.Contains(pos) && dir != FIntVector(0,0,0)) {
 						bool con = true;
-						auto odirs = directionFromIntVector(dir);
-						for (EDirection& odir: odirs) {
-							if (WallObstucles.Contains(FBoarderKey(odir, origin))) {
-								obstrucles.Add(origin);
-								con = false;
-							}
-							if (WallObstucles.Contains(FBoarderKey(oppersiteDirection(odir), addDir(odir, origin)))) {
-								obstrucles.Add(addDir(odir, origin));
-								con = false;
-							}
-							auto s = obstucles.Find(addDir(odir, origin));
+						for (int32 i = 0; i < odirs.Num(); i++) {
+							EDirection odir = odirs[i];
+							auto s = obstucles.Find(pos);
 							if (s) {
 								con = s->isUpToEdge ? false : con;
+								obstrucles.Add(pos);
+							}
+							FBoarderKey key = FBoarderKey(odir, pos);
+							if (WallObstucles.Contains(key)) {
+								obstrucles.Add(pos);
+								con = false;
+							}
+							else {
+								UE_LOG(LogWorld, Warning, TEXT("dir=%s, postition=%s"), *dir.ToString(),*key.origin.ToString());
+							}
+							FBoarderKey okey = FBoarderKey(oppersiteDirection(odir), origin);
+							if (WallObstucles.Contains(okey)) {
 								obstrucles.Add(origin);
+								con = false;
+							}
+							else {
+								UE_LOG(LogWorld, Warning, TEXT("dir=%s, postition=%s"), *dir.ToString(), *okey.origin.ToString());
 							}
 						}
 						if (con) {

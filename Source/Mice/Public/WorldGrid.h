@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "EngineMinimal.h"
 #include "GridCollision.h"
 #include "Unit.h"
 #include "GridObject.h"
@@ -32,6 +32,8 @@ public:
 		isUpToEdge(onEdge){}
 };
 
+
+
 USTRUCT(BlueprintType)
 struct FBoarderKey {
 
@@ -59,6 +61,14 @@ public:
 	{
 		return FCrc::MemCrc_DEPRECATED(&Key, sizeof(FBoarderKey));
 	}
+	/*
+	FORCEINLINE FString ToString() const
+	{
+		const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EDirection"), true);
+		if (!EnumPtr) return FString::Printf(TEXT("invalid dir pos=%s"), *origin.ToString());
+		return FString::Printf(TEXT("dir=%s pos=%s"), EnumPtr->GetDisplayNameText((int64)Direction), *origin.ToString());
+	}
+	*/
 };
 
 USTRUCT(BlueprintType)
