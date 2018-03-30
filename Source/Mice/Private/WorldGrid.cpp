@@ -360,7 +360,10 @@ void AWorldGrid::OnConstruction(const FTransform& Transform)
 			UE_LOG(LogWorld, Log, TEXT("starting postition %s"), *go.Origin.ToString());
 			auto rot = FVector(directionToVector(object->GridOrigin.Direction) * -1).Rotation() + FRotator(0.0f, -90.0f, 0.0f);
 			UE_LOG(LogWorld, Log, TEXT("rotation %s"), *rot.ToString());
-			go.Origin = FIntVector(rot.RotateVector(FVector(go.Origin)));
+			FVector fvec = rot.RotateVector(FVector(go.Origin));
+			
+			UE_LOG(LogWorld, Log, TEXT("FVector =  %s"), *fvec.ToString());
+			go.Origin = FIntVector(FMath::RoundToInt(fvec.X), FMath::RoundToInt(fvec.Y), FMath::RoundToInt(fvec.Z));
 			UE_LOG(LogWorld, Log, TEXT("relative postition %s, direction %s"), *go.Origin.ToString(), *directionToVector(object->GridOrigin.Direction).ToString());
 			go.Origin = go.Origin + object->GridOrigin.Origin;
 			UE_LOG(LogWorld, Log, TEXT("end postition %s"), *go.Origin.ToString());
