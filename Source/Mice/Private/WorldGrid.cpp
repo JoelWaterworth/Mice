@@ -458,7 +458,6 @@ TArray<FIntVector> AWorldGrid::GetNeighbours(FIntVector origin, bool bReturnObst
 	TArray<FIntVector> neighbours = TArray<FIntVector>();
 	TArray<FIntVector> obstrucles = TArray<FIntVector>();
 
-	//for (int32 z = -1; z < 2; z++) {
 	for (int32 y = -1; y < 2; y++) {
 		for (int32 x = -1; x < 2; x++) {
 			if (!(x == 0 && y == 0)) {
@@ -479,16 +478,10 @@ TArray<FIntVector> AWorldGrid::GetNeighbours(FIntVector origin, bool bReturnObst
 							obstrucles.Add(pos);
 							con = false;
 						}
-						else {
-							UE_LOG(LogWorld, Warning, TEXT("dir=%s, postition=%s"), *odir.ToString(),*key.origin.ToString());
-						}
 						FBoarderKey okey = FBoarderKey(odir * -1, origin);
 						if (WallObstucles.Contains(okey)) {
 							obstrucles.Add(origin);
 							con = false;
-						}
-						else {
-							UE_LOG(LogWorld, Warning, TEXT("dir=%s, postition=%s"), *odir.ToString(), *okey.origin.ToString());
 						}
 					}
 					if (con) {
@@ -501,7 +494,6 @@ TArray<FIntVector> AWorldGrid::GetNeighbours(FIntVector origin, bool bReturnObst
 			}
 		}
 	}
-	//}
 	if (bReturnObstucles) {
 		return obstrucles;
 	}
