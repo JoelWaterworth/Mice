@@ -20,16 +20,20 @@ struct FWeapon
 		int32 minDamage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int32 maxDamage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int32 maxAmmoCount;
 public:
 	FWeapon(
 		UCurveFloat* arc = nullptr,
 		USoundCue* s = nullptr,
 		int32 minD = 6,
-		int32 maxD = 8) :
+		int32 maxD = 8,
+		int32 maxAmmo = 8) :
 			projectProbArc(arc),
 			sound(s),
 			minDamage(minD),
-			maxDamage(maxD){}
+			maxDamage(maxD),
+			maxAmmoCount(maxAmmo){}
 };
 
 UENUM(BlueprintType)
