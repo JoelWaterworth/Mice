@@ -136,9 +136,11 @@ FIntVector AWorldGrid::LocationToVector(FVector currentPos)
 void AWorldGrid::GetSpawnPoints() {
 	BlueSpawnPoints.Empty();
 	RedSpawnPoints.Empty();
+	SpawnPoints.Empty();
 	for (TActorIterator<AUnitSpawn> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
 		AUnitSpawn* object = *ActorItr;
+		SpawnPoints.Push(object);
 		switch (object->team)
 		{
 		case ETeam::T_Blue:

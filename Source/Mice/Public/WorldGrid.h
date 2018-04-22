@@ -9,6 +9,7 @@
 #include "Runtime/Engine/Classes/Components/TextRenderComponent.h"
 #include "Runtime/Engine/Classes/Components/InstancedStaticMeshComponent.h"
 #include "Misc/Crc.h"
+#include "UnitSpawn.h"
 #include "Engine/BlockingVolume.h"
 #include "GameFramework/Actor.h"
 #include "WorldGrid.generated.h"
@@ -136,6 +137,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Points")
 		TArray<FIntVector> RedSpawnPoints;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Points")
+		TArray<AUnitSpawn*> SpawnPoints;
 
 protected:
 	// Called when the game starts or when spawned

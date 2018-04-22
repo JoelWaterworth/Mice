@@ -9,6 +9,7 @@
 #include "Classes/Engine/World.h"
 #include "Unit.h"
 #include "EngineUtils.h"
+#include "UnitSpawn.h"
 #include <EngineGlobals.h>
 #include <Runtime/Engine/Classes/Engine/Engine.h>
 #include "Kismet/GameplayStatics.h"
@@ -43,28 +44,15 @@ void AMGameMode::BeginPlay()
 		if (worldGrid) {
 			if ((worldGrid->BlueSpawnPoints.Num() > 0) && (worldGrid->RedSpawnPoints.Num() > 0))
 			{
-				for (FIntVector& pos : worldGrid->BlueSpawnPoints)
+				for (AUnitSpawn* spawn : worldGrid->SpawnPoints)
 				{
-					FTransform trans = worldGrid->VectorToWorldTransform(pos);
+					FTransform trans = worldGrid->VectorToWorldTransform(spawn->origin);
 					AUnit* unit = World->SpawnActor<AUnit>(worldGrid->spawnClass, trans);
 					if (unit)
 					{
-						unit->UpdatePos(pos);
-						unit->team = ETeam::T_Blue;
-					}
-				}
-
-				for (FIntVector& pos : worldGrid->RedSpawnPoints)
-				{
-					FTransform trans = worldGrid->VectorToWorldTransform(pos);
-					AUnit* unit = World->SpawnActor<AUnit>(worldGrid->spawnClass, trans);
-					if (unit)
-					{
-						unit->UpdatePos(pos);
-						unit->team = ETeam::T_Red;
-					}
-					else {
-
+						unit->UpdatePos(spawn->origin);
+						unit->team = spawn->team;
+						unit->SetActorRotation(spawn->GetActorRotation());
 					}
 				}
 			}

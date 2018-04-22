@@ -75,7 +75,11 @@ void AGridObject::UpdatePosition()
 		auto rot = FRotator(0.0f, FMath::RoundToFloat( angle) * 90.0f, 0.0f);
 		SetActorRotation(rot);
 		auto vec = rot.RotateVector(FVector(0.0f, 1.0f, 0.0f));
-		GridOrigin.Direction = FIntVector(FMath::RoundToInt(vec.X), FMath::RoundToInt(vec.Y), FMath::RoundToInt(vec.Z));
+		GridOrigin.Direction = FIntVector(
+			FMath::RoundToInt(vec.X),
+			FMath::RoundToInt(vec.Y),
+			FMath::RoundToInt(vec.Z)
+		);
 
 		TArray<UActorComponent*> actors = TArray<UActorComponent*>();
 		GetComponents<UActorComponent>(actors);
