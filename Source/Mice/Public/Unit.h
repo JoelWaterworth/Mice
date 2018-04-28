@@ -84,6 +84,15 @@ public:
 		float CalculateProbabilityOfShot(FVector start, FVector end, bool bDebug = false);
 
 	UFUNCTION(server, reliable, WithValidation, BlueprintCallable)
+		void ServerUpdateTeam(ETeam newTeam);
+
+	UFUNCTION(NetMulticast, reliable)
+		void MulticastUpdateTeam(ETeam newTeam);
+
+	UFUNCTION(BlueprintNativeEvent)
+		void UpdateTeam(ETeam newTeam);
+
+	UFUNCTION(server, reliable, WithValidation, BlueprintCallable)
 		void UpdatePos(FIntVector n_pos);
 
 	UPROPERTY(Replicated, BlueprintReadWrite)

@@ -51,7 +51,7 @@ void AMGameMode::BeginPlay()
 					if (unit)
 					{
 						unit->UpdatePos(spawn->origin);
-						unit->team = spawn->team;
+						unit->ServerUpdateTeam(spawn->team);
 						unit->SetActorRotation(spawn->GetActorRotation());
 					}
 				}

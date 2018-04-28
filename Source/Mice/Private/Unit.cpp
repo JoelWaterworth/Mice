@@ -77,3 +77,23 @@ float AUnit::CalculateProbabilityOfShot(FVector start, FVector end, bool bDebug)
 	}
 	return 0.0f;
 }
+
+void AUnit::ServerUpdateTeam_Implementation(ETeam newTeam)
+{
+	team = newTeam;
+	MulticastUpdateTeam(newTeam);
+}
+
+void AUnit::MulticastUpdateTeam_Implementation(ETeam newTeam)
+{
+	UpdateTeam(newTeam);
+}
+
+bool AUnit::ServerUpdateTeam_Validate(ETeam newTeam)
+{
+	return true;
+}
+
+void AUnit::UpdateTeam_Implementation(ETeam newTeam)
+{
+}
