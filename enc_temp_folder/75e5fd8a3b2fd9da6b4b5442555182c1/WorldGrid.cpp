@@ -510,14 +510,17 @@ void AWorldGrid::AddBlockingTiles(FGridTransform GridOrigin)
 	for (FIntVector& pos : GridOrigin.BlockedTiles) {
 		FIntVector loc = pos + GridOrigin.Origin;
 		if (GridOrigin.isBorder) {
-			WallObstucles.Add(FBoarderKey(GridOrigin.Direction, loc),
-				FObstucle(GridOrigin.blockPercentage));
-			if (GridOrigin.isRightHandCorner) {
-				FVector fvec = FRotator(0.0f, 0.0f, 0.0f).RotateVector(FVector(GridOrigin.Direction));
-				auto righthand = FIntVector(FMath::RoundToInt(fvec.X), FMath::RoundToInt(fvec.Y), FMath::RoundToInt(fvec.Z));
-				WallObstucles.Add(FBoarderKey(righthand, loc),
+			auto boarder = [](FIntVector loc, FIntVector dir, TMap<FBoarderKey, FObstucle>& WallObstucles, FGridTransform GridOrigin) {
+				WallObstucles.Add(FBoarderKey(dir, loc),
 					FObstucle(GridOrigin.blockPercentage));
+				if (GridOrigin.isRightHandCorner) {
+					FVector fvec = FRotator(0.0f, 0.0f, 0.0f).RotateVector(FVector(dir));
+					auto righthand = FIntVector(FMath::RoundToInt(fvec.X), FMath::RoundToInt(fvec.Y), FMath::RoundToInt(fvec.Z));
+					WallObstucles.Add(FBoarderKey(righthand, loc),
+						FObstucle(GridOrigin.blockPercentage));
+				};
 			};
+			boarder(loc, GridOrigin.Direction, WallObstucles, GridOrigin);
 		}
 		else
 		{
