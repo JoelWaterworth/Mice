@@ -309,114 +309,115 @@ bool AWorldGrid::isObstuclePresent(FIntVector origin, FIntVector dir)
 
 void AWorldGrid::OnConstruction(const FTransform& Transform)
 {
-	Super::OnConstruction(Transform);
-	//Empty the array and delete all it's components
+	if (Refresh) {
+		Super::OnConstruction(Transform);
+		//Empty the array and delete all it's components
 
-	if (GetWorld()->GetGameInstance())
-	{
-		UMGameInstance* GameInstance = Cast<UMGameInstance>(GetWorld()->GetGameInstance());
-		if (GameInstance)
+		if (GetWorld()->GetGameInstance())
 		{
-			spacing = GameInstance->Spacing;
-		}
-	}
-
-	TArray<UBoxComponent*> boxs;
-	GetComponents(boxs);
-
-	for (UBoxComponent* box : boxs)
-	{
-		if (box)
-		{
-			box->DestroyComponent();
-		}
-	}
-	for (USceneComponent* elem : waste)
-	{
-		if (elem)
-		{
-			elem->DestroyComponent();
-		}
-	}
-
-	waste.Empty();
-	gridTiles.Empty();
-	obstucles.Empty();
-	WallObstucles.Empty();
-
-	TArray<ABlockingVolume*> GridBlockingVolumes;
-
-	for (TActorIterator<ABlockingVolume> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-	{
-		ABlockingVolume* object = *ActorItr;
-		GridBlockingVolumes.Push(object);
-	}
-
-	TArray<FGridTransform> trans;
-
-	for (TActorIterator<AGridObject> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-	{
-		// Access the subclass instance with the * or -> operators.
-		AGridObject* object = *ActorItr;
-		trans.Add(object->GridOrigin);
-		AddBlockingTiles(object->GridOrigin);
-		for (FGridTransform& GridOrigin : object->GridChildren) {
-			FGridTransform go = GridOrigin;
-			auto rot = FVector(object->GridOrigin.Direction * -1).Rotation() + FRotator(0.0f, 90.0f, 0.0f);
-			FVector fvec = rot.RotateVector(FVector(go.Origin));
-			
-			go.Origin = FIntVector(FMath::RoundToInt(fvec.X), FMath::RoundToInt(fvec.Y), FMath::RoundToInt(fvec.Z));
-			go.Origin = go.Origin + object->GridOrigin.Origin;
-			rot = FVector(object->GridOrigin.Direction * -1).Rotation() + FRotator(0.0f, 90.0f, 0.0f);
-			FVector fdvec = rot.RotateVector(FVector(go.Direction));
-			go.Direction = FIntVector(FMath::RoundToInt(fdvec.X), FMath::RoundToInt(fdvec.Y), FMath::RoundToInt(fdvec.Z));
-			trans.Add(go);
-			AddBlockingTiles(go);
-		}
-	}
-
-	for (FGridTransform& tran : trans)
-	{
-		for (FIntVector& pos : tran.WalkablePosistions)
-		{
-			FIntVector loc = pos + tran.Origin;
-			if (loc.X < minX) {
-				minX = loc.X;
+			UMGameInstance* GameInstance = Cast<UMGameInstance>(GetWorld()->GetGameInstance());
+			if (GameInstance)
+			{
+				spacing = GameInstance->Spacing;
 			}
-			if (loc.Y < minY) {
-				minY = loc.Y;
+		}
+
+		TArray<UBoxComponent*> boxs;
+		GetComponents(boxs);
+
+		for (UBoxComponent* box : boxs)
+		{
+			if (box)
+			{
+				box->DestroyComponent();
 			}
-			bool bInObstucle = obstucles.Contains(loc);
-			bool bInBlockingVolume = checkBlockingVolume(loc, GridBlockingVolumes);
-			if (!(bInObstucle || bInBlockingVolume)) {
-				int32 x = loc.X, y = loc.Y, z = loc.Z;
-				FVector vec = FVector((float)(x * spacing), (float)(y * spacing), (float)(z * spacing)) + FVector(spacing / 2, spacing / 2, 0.0f);
-				/*
-				UGridCollision* col = NewObject<UGridCollision>(this, UGridCollision::StaticClass());
-				if (col) {
-				col->RegisterComponent();
-				waste.Add(col);
-				col->SetBoxExtent(FVector(spacing / 2, spacing / 2, 10.0f), true);
-				col->pos = FIntVector(x, y, 0);
-				col->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
-				col->AttachToComponent(root, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-				FTransform colTrans = FTransform(FRotator(0.0f), vec);
-				col->SetRelativeTransform(colTrans);
+		}
+		for (USceneComponent* elem : waste)
+		{
+			if (elem)
+			{
+				elem->DestroyComponent();
+			}
+		}
+
+		waste.Empty();
+		gridTiles.Empty();
+		obstucles.Empty();
+		WallObstucles.Empty();
+
+		TArray<ABlockingVolume*> GridBlockingVolumes;
+
+		for (TActorIterator<ABlockingVolume> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		{
+			ABlockingVolume* object = *ActorItr;
+			GridBlockingVolumes.Push(object);
+		}
+
+		TArray<FGridTransform> trans;
+
+		for (TActorIterator<AGridObject> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		{
+			// Access the subclass instance with the * or -> operators.
+			AGridObject* object = *ActorItr;
+			trans.Add(object->GridOrigin);
+			AddBlockingTiles(object->GridOrigin);
+			for (FGridTransform& GridOrigin : object->GridChildren) {
+				FGridTransform go = GridOrigin;
+				auto rot = FVector(object->GridOrigin.Direction * -1).Rotation() + FRotator(0.0f, 90.0f, 0.0f);
+				FVector fvec = rot.RotateVector(FVector(go.Origin));
+
+				go.Origin = FIntVector(FMath::RoundToInt(fvec.X), FMath::RoundToInt(fvec.Y), FMath::RoundToInt(fvec.Z));
+				go.Origin = go.Origin + object->GridOrigin.Origin;
+				rot = FVector(object->GridOrigin.Direction * -1).Rotation() + FRotator(0.0f, 90.0f, 0.0f);
+				FVector fdvec = rot.RotateVector(FVector(go.Direction));
+				go.Direction = FIntVector(FMath::RoundToInt(fdvec.X), FMath::RoundToInt(fdvec.Y), FMath::RoundToInt(fdvec.Z));
+				trans.Add(go);
+				AddBlockingTiles(go);
+			}
+		}
+
+		for (FGridTransform& tran : trans)
+		{
+			for (FIntVector& pos : tran.WalkablePosistions)
+			{
+				FIntVector loc = pos + tran.Origin;
+				if (loc.X < minX) {
+					minX = loc.X;
 				}
-				*/
-				gridTiles.Add(FIntVector(x, y, z), FGridTile());
-			}
-			else {
-				UE_LOG(LogWorld, Verbose, TEXT("postition %sis blocked"), *pos.ToString());
+				if (loc.Y < minY) {
+					minY = loc.Y;
+				}
+				bool bInObstucle = obstucles.Contains(loc);
+				bool bInBlockingVolume = checkBlockingVolume(loc, GridBlockingVolumes);
+				if (!(bInObstucle || bInBlockingVolume)) {
+					int32 x = loc.X, y = loc.Y, z = loc.Z;
+					FVector vec = FVector((float)(x * spacing), (float)(y * spacing), (float)(z * spacing)) + FVector(spacing / 2, spacing / 2, 0.0f);
+					/*
+					UGridCollision* col = NewObject<UGridCollision>(this, UGridCollision::StaticClass());
+					if (col) {
+					col->RegisterComponent();
+					waste.Add(col);
+					col->SetBoxExtent(FVector(spacing / 2, spacing / 2, 10.0f), true);
+					col->pos = FIntVector(x, y, 0);
+					col->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
+					col->AttachToComponent(root, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+					FTransform colTrans = FTransform(FRotator(0.0f), vec);
+					col->SetRelativeTransform(colTrans);
+					}
+					*/
+					gridTiles.Add(FIntVector(x, y, z), FGridTile());
+				}
+				else {
+					UE_LOG(LogWorld, Verbose, TEXT("postition %sis blocked"), *pos.ToString());
+				}
 			}
 		}
+
+		GetSpawnPoints();
+		Refresh = false;
+		//Register all the components
+		RegisterAllComponents();
 	}
-
-	GetSpawnPoints();
-
-	Refresh = false;
-	//Register all the components
-	RegisterAllComponents();
 }
 
 bool AWorldGrid::checkBlockingVolume(FIntVector Pos, TArray<ABlockingVolume*> GridBlockingVolumes) {
@@ -466,7 +467,7 @@ TArray<FIntVector> AWorldGrid::GetNeighbours(FIntVector origin, bool bReturnObst
 				FIntVector dir = FIntVector(x, y, origin.Z);
 				TArray<FIntVector> odirs = directionFromIntVector(dir);
 				FIntVector pos = dir + origin;
-				if (gridTiles.Contains(pos) && dir != FIntVector(0,0,0)) {
+				if (gridTiles.Contains(pos)) {
 					bool con = true;
 					auto s = obstucles.Find(pos);
 					if (s) {

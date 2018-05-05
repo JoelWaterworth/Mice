@@ -46,7 +46,7 @@ void AMGameMode::BeginPlay()
 			{
 				for (AUnitSpawn* spawn : worldGrid->SpawnPoints)
 				{
-					FTransform trans = worldGrid->VectorToWorldTransform(spawn->origin);
+					FTransform trans = FTransform(FVector(spawn->origin * 100.0f) + FVector(50.0f, 50.0f, 0.0f));
 					AUnit* unit = World->SpawnActor<AUnit>(worldGrid->spawnClass, trans);
 					if (unit)
 					{

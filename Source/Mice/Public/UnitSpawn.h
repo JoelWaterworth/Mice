@@ -24,5 +24,8 @@ public:
 		FIntVector origin;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FIntVector direction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		ETeam team;
 };

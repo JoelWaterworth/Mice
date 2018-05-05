@@ -50,25 +50,6 @@ void AGridObject::UpdatePosition()
 		loc = loc / 100.0f;
 		FIntVector pos = FIntVector(FMath::FloorToInt(loc.X), FMath::FloorToInt(loc.Y), FMath::FloorToInt(loc.Z));
 		SetActorLocation(FVector(pos * 100) + FVector(50.0f, 50.0f, 0.0f));
-		/*
-		TArray<AActor*> worldGrids;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWorldGrid::StaticClass(), worldGrids);
-		if (worldGrids.Num() == 0)
-		{
-			return;
-		};
-
-
-		AWorldGrid* worldGrid = Cast<AWorldGrid>(worldGrids[0]);
-		if (worldGrid)
-		{
-			FIntVector offset = worldGrid->LocationToVector(loc);
-			FRotator rotOffset = worldGrid->GetActorRotation();
-
-			RootComponent->SetWorldLocation(worldGrid->VectorToWorldTransform(offset).GetLocation());
-			GridOrigin.Origin = offset;
-		}
-		*/
 		GridOrigin.Origin = pos;
 		float x = (float)((int)GetActorRotation().Yaw % 360);
 		float angle = x / 90.0f;

@@ -77,8 +77,6 @@ struct FGridTile
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		bool isWalkable;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 		UGridCollision* CollisionBox;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -87,10 +85,8 @@ struct FGridTile
 public:
 
 	FGridTile(
-		bool w = false,
 		UGridCollision* col = nullptr,
 		UTextRenderComponent* text = nullptr) : 
-			isWalkable(w),
 			CollisionBox(col),
 			DebugTextRender(text){}
 };
