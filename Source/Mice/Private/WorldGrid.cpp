@@ -513,7 +513,7 @@ void AWorldGrid::AddBlockingTiles(FGridTransform GridOrigin)
 			WallObstucles.Add(FBoarderKey(GridOrigin.Direction, loc),
 				FObstucle(GridOrigin.blockPercentage));
 			if (GridOrigin.isRightHandCorner) {
-				FVector fvec = FRotator(0.0f, 0.0f, 0.0f).RotateVector(FVector(GridOrigin.Direction));
+				FVector fvec = FRotator(0.0f, 90.0f, 00.0f).RotateVector(FVector(GridOrigin.Direction));
 				auto righthand = FIntVector(FMath::RoundToInt(fvec.X), FMath::RoundToInt(fvec.Y), FMath::RoundToInt(fvec.Z));
 				WallObstucles.Add(FBoarderKey(righthand, loc),
 					FObstucle(GridOrigin.blockPercentage));
