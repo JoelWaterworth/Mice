@@ -64,10 +64,10 @@ ETeam AMGameMode::ChooseTeam()
 {
 	int32 count = GameState->PlayerArray.Num();
 	if (count % 2 == 1) {
-		return ETeam::T_Blue;
+		return ETeam::T_Red;
 	}
 	else {
-		return ETeam::T_Red;
+		return ETeam::T_Blue;
 	}
 }
 
